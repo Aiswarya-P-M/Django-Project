@@ -3,4 +3,8 @@ from .views import *
 
 urlpatterns=[
     path('',StudentView.as_view(),name='list_student'),
+    path('student_details/<int:id>',StudentDetailView.as_view(),name='student_details'),
+    
+    
+
 ]
