@@ -35,7 +35,8 @@ class StudentDetailView(APIView):
             return Response({'message': f'Student {name} deleted successfully'}, status=status.HTTP_200_OK)
         except Student.DoesNotExist:
         # Handle the case where the student doesn't exist
-            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Student not found'},
+            status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
         # Log and handle other exceptions
             print(e)
