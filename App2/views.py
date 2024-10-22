@@ -13,9 +13,18 @@ class Student1View(APIView):
         serializer=Student1serializers(students1, many=True)
         return Response(serializer.data)
 
-
+    def delete(self,request):
+        try:
+            students1=Student1.objects.all()
+            # name=students1.name
+            students1.delete()
+            return Response({'Student record deleted successfully'},status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
     def post(self,request):
-        serialize=Student1serializers(data=request.data)
+        serialize=Student1serializers(data=request.data,many=True)
         if serialize.is_valid():
             serialize.save()
             return Response({"message:""Student Details Added Successfully"},status=status.HTTP_201_CREATED)
@@ -42,7 +51,7 @@ class Student1DetailView(APIView):
             students1=Student1.objects.get(rollno=rollno)
             name=students1.name
             students1.delete()
-            return Response({'message':f'Student {name} deleted successfully'},status=status.HTTP_200_OK)
+            return Response({'Student record deleted successfully'},status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -67,17 +76,17 @@ class Student1ListofFailedView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)    
 
 class Student1ListofaverageView(APIView):
-    def get(self,request):
-        average_marks=calculate_average_marks()
-        students_above_average=Student1.objects.filter(total_marks__gte=average_marks)
-        students_below_average=Student1.objects.filter(total_marks__lt=average_marks)
-        above_average_serializer=Student1serializers(students_above_average,many=True)
-        below_average_serializer=Student1serializers(students_below_average,many=True)
+    def get(self, request):
+        students1 = Student1.objects.all()
+        average_marks = calculate_average_marks(students1.count(), sum(student.total_marks for student in students1))
+        above_average = Student1.objects.filter(total_marks__gte=average_marks)
+        below_average = Student1.objects.filter(total_marks__lt=average_marks)
         return Response({
             'average_marks': average_marks,
-            'students_above_average': above_average_serializer.data,
-            'students_below_average': below_average_serializer.data
+            'students_above_average': Student1serializers(above_average, many=True).data,
+            'students_below_average': Student1serializers(below_average, many=True).data
         }, status=status.HTTP_200_OK)
+
 
 class StudentsubjectwisefailedlistView(APIView):
     def get(self,request):
@@ -87,7 +96,7 @@ class StudentsubjectwisefailedlistView(APIView):
             'failedin_maths':Student1serializers(subjectwise_failures['failedin_maths'],many=True).data,
             'failedin_chemistry':Student1serializers(subjectwise_failures['failedin_chemistry'],many=True).data,
             'failedin_physics':Student1serializers(subjectwise_failures['failedin_physics'],many=True).data
-        },status=status.HTTP_200_OK)
+        },status=status.HTTP_200_OK) 
 
 
 class TeacherPerformanceView(APIView):
@@ -112,3 +121,27 @@ class TeacherPerformanceView(APIView):
             'best_teachers': best_teachers,
             'teachers_needing_improvement': teachers_needing_improvement
         }, status=status.HTTP_200_OK)
+
+class teacherdetailsView(APIView):
+    def get(self, request, teacher_id):
+        try:
+            teacher = Teacher.objects.get(emp_id=teacher_id)
+            teacher_serializer = Teacherserializers(teacher)
+            # Corrected: List comprehension to create a list of dictionaries
+            # student_list = [
+            #     {
+            #         'name': student.name,
+            #         'rollno': student.rollno
+            #     } 
+            #     for student in students
+            # ]
+
+            return Response({
+                'teacher': teacher_serializer.data
+                # 'students': student_list
+            }, status=status.HTTP_200_OK)
+
+        except Teacher.DoesNotExist:
+            return Response({
+                'error': 'Teacher not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
