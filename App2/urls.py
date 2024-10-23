@@ -11,6 +11,9 @@ urlpatterns=[
     path('subjectvice/',StudentsubjectwisefailedlistView.as_view(),name='subjectvicefailedlist'),
     path('teachperformance/',TeacherPerformanceView.as_view(),name='teachersperformance'),
     path('teacherdetails/<int:teacher_id>/',teacherdetailsView.as_view(),name='teacherdetails'),
+    path('alldetails/',TeacherallDetailsView.as_view(),name='teachersalldetails'),
+    path('updateperformance/',updateperformanceView.as_view(),name='updateper'),
+    path('performanceupdate/<int:rollno>/',performanceupdateView.as_view(),name='performanceupdate'),
     
 
 ]

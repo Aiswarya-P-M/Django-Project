@@ -1,4 +1,4 @@
-from .models import Student1
+from .models import *
 
 def calculate_average_marks(total_students: int, total_marks_sum: float):
     return (total_marks_sum / total_students) if total_students > 0 else 0
@@ -34,6 +34,6 @@ def calculate_teacher_pass_percentage(teacher_id):
     if total_students > 0:
         # Calculate pass percentage
         pass_percentage = (passed_students_count / total_students) * 100
-        return round(pass_percentage, 2)
+        return round(pass_percentage,2)
     
     return 0
