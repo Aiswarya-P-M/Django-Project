@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "App2",
     "django_extensions",
-    
+    "app_School",
+    "app_Department",
 
 ]
 
