@@ -5,7 +5,7 @@ from django.db import models
 # from App2.models import Teacher
 
 class Departments(models.Model):
-    hod_name=models.ForeignKey('App2.Teacher',on_delete=models.DO_NOTHING,null=True,blank=True)
+    hod_name=models.ForeignKey('app_Teacher.Teacher2',on_delete=models.DO_NOTHING,null=True,blank=True)
     dept_name=models.CharField(max_length=100)
     dept_id=models.AutoField(primary_key=True)
     sc_id = models.ForeignKey('app_School.School', on_delete=models.DO_NOTHING,null=True,blank=True)

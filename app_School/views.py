@@ -12,7 +12,7 @@ class SchoolcreateView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
     def post(self,request):
-        serializer=SchoolSerializer(data=request.data)
+        serializer=SchoolSerializer(data=request.data,many=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"message:""School Details Added Successfully"},status=status.HTTP_201_CREATED)

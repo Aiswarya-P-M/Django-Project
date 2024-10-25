@@ -13,7 +13,7 @@ class Teacherserializers(serializers.ModelSerializer):
         fields="__all__"
 
 class Student1serializers(serializers.ModelSerializer):
-    teacher_id=serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all())  # Allow write access
+    teacher_id=serializers.PrimaryKeyRelatedField(queryset=Teacher2.objects.all())  # Allow write access
     class Meta:
         model = Student1
         fields = "__all__"

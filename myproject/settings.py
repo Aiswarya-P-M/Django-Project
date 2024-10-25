@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "app_School",
     "app_Department",
+    "app_Teacher",
 
 ]
 
