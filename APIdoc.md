@@ -2,7 +2,7 @@
 
 ## Structure of the Project
 
-The project is named a myproject. In django we can create a project using the command
+The project is named as myproject. In django we can create a project using the command
 ```python
 django-admin startproject myproject
 ```
