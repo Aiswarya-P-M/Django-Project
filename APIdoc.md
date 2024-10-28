@@ -112,7 +112,13 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 ### => Serializers.py file
-
+```python
+class Student1serializers(serializers.ModelSerializer):
+    teacher_id=serializers.PrimaryKeyRelatedField(queryset=Teacher2.objects.all())  # Allow write access
+    class Meta:
+        model = Student1
+        fields = "__all__"
+```
 The `Student1serializers` class is a Django REST Framework serializer for the `Student1` model. It uses `ModelSerializer` to automatically handle all fields in `Student1` (`fields = "__all__"`), enabling easy conversion between `Student1` instances and JSON format.
 
 - **teacher_id**: Defined with `PrimaryKeyRelatedField`, allowing write access by accepting the primary key of a `Teacher2` instance.
