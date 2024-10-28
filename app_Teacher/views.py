@@ -10,6 +10,7 @@ from App2.utils import calculate_teacher_pass_percentage
 
 # Create your views here.
 class TeacherPerformanceView(APIView):
+    # finding the performance of teacher
     def get(self, request):
         best_teachers = []
         teachers_needing_improvement = []
@@ -46,8 +47,9 @@ class teacherdetailsView(APIView):
             return Response({
                 'error': 'Teacher not found.'
             }, status=status.HTTP_404_NOT_FOUND)
+    
 
-
+    
 
 class TeacherallDetailsView(APIView):
     def get(self, request):
@@ -56,7 +58,7 @@ class TeacherallDetailsView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = Teacher2serializers(data=request.data, many=True)
+        serializer = Teacher2serializers(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Teacher details added successfully'}, status=status.HTTP_201_CREATED)
@@ -136,3 +138,62 @@ class performanceupdateView(APIView):
     
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Teacher under the same school
+
+class Teacherbyschoolview(APIView):
+    def get(self,request,sc_id):
+        teacher=Teacher2.active_objects.filter(sc_id=sc_id)
+        serializer=Teacher2serializers(teacher,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+# active teachers
+class Activeteachers(APIView):
+    def get(self,request):
+        teacher=Teacher2.active_objects.all()
+        serializer=Teacher2serializers(teacher,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+class Inactiveteachers(APIView):
+    def get(self,request):
+        teacher=Teacher2.objects.filter(is_active=False)
+        serializer=Teacher2serializers(teacher, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+# teachers under the same dept
+class Teacherbydeptview(APIView):
+    def get(self,request,dept_id):
+        teacher=Teacher2.active_objects.filter(dept_id=dept_id)
+        serializer=Teacher2serializers(teacher,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+#updating the teacher details based on id 
+class TeacherbyidView(APIView):
+    def put(self,request,emp_id):
+        try:
+            teacher=Teacher2.active_objects.get(emp_id=emp_id)
+        except Teacher2.Doesnotexist:
+            return Response({"error":"Teacher not found"},status=status.HTTP_404_NOT_FOUND)
+        serializer=Teacher2serializers(teacher,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # def delete(self, request, emp_id):
+    #     try:
+    #         # Corrected typo: 'Tracher2' should be 'Teacher2'
+    #         teacher = Teacher2.active_objects.get(emp_id=emp_id)
+    #         teacher.delete()
+    #         return Response({'message': "Teacher data deleted successfully"}, status=status.HTTP_200_OK)
+    #     except Teacher2.DoesNotExist:
+    #         return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, emp_id):
+        try:
+            teacher = Teacher2.objects.get(emp_id=emp_id)
+            teacher.is_active = False
+            teacher.save()
+            return Response({'message': "Teacher data set to inactive successfully"}, status=status.HTTP_200_OK)
+        except Teacher2.DoesNotExist:
+            return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)

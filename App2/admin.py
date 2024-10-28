@@ -6,4 +6,4 @@ from .models import *
 #     list_display = ('name', 'rollno', 'maths', 'chemistry', 'physics', 'total_marks', 'percentage', 'classteacher')
 #     readonly_fields = ('total_marks', 'percentage')
 admin.site.register(Student1)
-admin.site.register(Teacher)
+# admin.site.register(Teacher)

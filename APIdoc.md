@@ -1,150 +1,134 @@
-# **API Documentation of Student Project**
+# **API Documentation**
 
-## Structure of the Project
+This project mainly consists of 4 apps and 31 api endpoints.
 
-The project is named as myproject. In django we can create a project using the command
-```python
-django-admin startproject myproject
-```
-After the creation of project we need to navigate to  the project directory. For that run the command in terminal
-```python
-cd myproject
-``` 
-Then we need to create a virtual environment.Virtual environments in Python allow you to create isolated spaces for your projects, each with its own set of dependencies and package versions. This is especially useful when working on multiple projects with differing requirements or to prevent dependency conflicts. For creating the virtual environment run the command
-```python
-python -m venv myenv
-```
-After creating the virtual environment activate it.
-```python
-myenv\Scripts\activate
-``` 
-This project mainly consists of 4 apps
+1. Student app - 11 api
+2. Teacher app - 8 api
+3. School app - 6 api
+4. Department app - 6 api
 
-1. App2 (For Student)
-2. Teacher App
-3. School App
-4. Department App
 
-## **App2**
-
-### => For creating the  app run the command 
-```
-python manage.py startapp App2
-python manage.py startapp app_Teacher
-python manage.py startapp app_School
-python manage.py startapp app_Department
-
-```
-### => Configure the settings.py file by adding the installed apps inside the installed apps.
-```
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "Myapp",
-    "rest_framework",
-    "App2",
-    "django_extensions",
-    "app_School",
-    "app_Department",
-    "app_Teacher",
-```
-### => Create models.py file for Student App
-```
-class Student1(models.Model):
-    name=models.CharField(max_length=50)
-    rollno=models.AutoField(primary_key=True)
-    maths=models.FloatField()
-    chemistry=models.FloatField()
-    physics=models.FloatField()
-    total_marks=models.FloatField(editable=False)
-    percentage=models.FloatField(editable=False)
-    teacher_id = models.ForeignKey('app_Teacher.Teacher2', on_delete=models.DO_NOTHING,null=True,blank=True)
-    sc_id = models.ForeignKey(School, on_delete=models.DO_NOTHING,null=True,blank=True)
-    dept_id=models.ForeignKey(Departments, on_delete=models.DO_NOTHING, null=True, blank=True)
-    created_on=models.DateTimeField(auto_now_add=True)
-    updated_on=models.DateTimeField(auto_now=True)
-
-    
-    def save(self, *args, **kwargs): 
-        self.total_marks = self.maths + self.chemistry + self.physics
-        self.percentage = (self.total_marks / 300) * 100
-        super(Student1, self).save(*args, **kwargs) 
-```
-
-This `Student1` model represents a student's academic information and includes fields for personal details, academic scores, relationships with other models, and automatically calculated fields.
-
-### Explanation of Each Field
-
-- **name**: Stores the student's name as a character field, with a maximum length of 50 characters.
-- **rollno**: An auto-incremented primary key field that uniquely identifies each student.
-- **maths**, **chemistry**, **physics**: Float fields for storing the student's scores in these three subjects.
-- **total_marks**: A float field to store the sum of scores in all subjects. It is set to `editable=False` because it will be calculated automatically and should not be manually modified.
-- **percentage**: A float field for storing the calculated percentage. It is also set to `editable=False` to prevent manual editing.
-- **teacher_id**: A foreign key referencing the `Teacher2` model (from `app_Teacher`), establishing a link between the student and a teacher.
-- **sc_id**: A foreign key to a `School` model, representing the school associated with the student.
-- **dept_id**: A foreign key to a `Departments` model, linking the student to a specific department.
-- **created_on**: Automatically captures the timestamp when a student record is created.
-- **updated_on**: Automatically updates the timestamp whenever a student record is modified.
-
-### Custom `save()` Method
-
-The `save()` method is overridden to automatically calculate and set `total_marks` and `percentage` before saving the record:
-
-- `total_marks` is calculated as the sum of `maths`, `chemistry`, and `physics` scores.
-- `percentage` is derived by dividing `total_marks` by 300 (assuming each subject is out of 100), then multiplying by 100 to get the percentage.
-  
-After these calculations, the `super().save()` method saves the record to the database. This approach ensures `total_marks` and `percentage` are always up to date.
-
-### => Register the model in the admin.py file
-```
-from django.contrib import admin
-from .models import *
-admin.site.register(Student1)
-```
-### => Perform Migrations
-After creating model migrate it
-```
-python manage.py makemigrations
-python manage.py migrate
-```
-### => Serializers.py file
-```python
-class Student1serializers(serializers.ModelSerializer):
-    teacher_id=serializers.PrimaryKeyRelatedField(queryset=Teacher2.objects.all())  # Allow write access
-    class Meta:
-        model = Student1
-        fields = "__all__"
-```
-The `Student1serializers` class is a Django REST Framework serializer for the `Student1` model. It uses `ModelSerializer` to automatically handle all fields in `Student1` (`fields = "__all__"`), enabling easy conversion between `Student1` instances and JSON format.
-
-- **teacher_id**: Defined with `PrimaryKeyRelatedField`, allowing write access by accepting the primary key of a `Teacher2` instance.
-  
-### => URL Configuration
-Main url configuration is done in the project urls.py file.
-from django.contrib import admin
-from django.urls import path,include
-```
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('student1/',include('App2.urls')),
-    path('school/',include('app_School.urls')),
-    path('dept/',include('app_Department.urls')),
-    path('teacher/',include('app_Teacher.urls')),
-```
-### => Creating functions and API Endpoints
-Student API Endpoints
+# API Endpoints of Student app
 
 1. Add New Student
 
-* Endpoint: POST /student1/
+* `URL`: http://127.0.0.1:8000/student1/
 
-* Description: Adds a new student record with details like name, roll number, and marks.
+* `Method` : POST
 
-2. Retrieve All Students
+* `Description`: Adds a new student record with details like name, roll number, and marks.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+* `Body Parameters`:
+
+| Field        | Data Type | Constraints | Relationship                   | Description                                                    |
+|--------------|-----------|-------------|--------------------------------|----------------------------------------------------------------|
+| `name`       | string    | Required    | -                              | The name of the student.                                       |
+| `maths`      | float     | Required    | -                              | The marks obtained in the maths subject.                       |
+| `chemistry`  | float     | Required    | -                              | The marks obtained in the chemistry subject.                   |
+| `physics`    | float     | Required    | -                              | The marks obtained in the physics subject.                     |
+| `teacher_id` | integer   | Optional    | Foreign Key to `Teacher2`     | The ID of the teacher associated with the student, if any.     |
+| `sc_id`      | integer   | Optional    | Foreign Key to `School`       | The ID of the school associated with the student, if any.      |
+| `dept_id`    | integer   | Optional    | Foreign Key to `Departments`   | The ID of the department associated with the student, if any.  |
+
+
+* `Fields Automatically Calculated`:
+
+| Field          | Data Type | Constraints       | Description                                                      |
+|----------------|-----------|-------------------|------------------------------------------------------------------|
+| `rollno`       | integer   | Auto-generated, Primary Key | The unique identifier for the student (do not include in requests). |
+| `total_marks`  | float     | Calculated        | The sum of marks obtained in maths, chemistry, and physics.      |
+| `percentage`    | float     | Calculated        | Calculated as (total_marks / 300) * 100.                        |
+| `created_on`   | datetime  | Auto-generated    | Timestamp when the record is created.                            |
+| `updated_on`   | datetime  | Auto-updated      | Timestamp when the record is last modified.                     |
+
+
+
+
+
+### Example Request
+
+```http
+POST /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+
+{
+  "name": "Shifana",
+  "maths": 85.5,
+  "chemistry": 90.0,
+  "physics": 88.0,
+  "teacher_id": 2,
+  "sc_id": 1,
+  "dept_id": 3
+}
+```
+### Example Reponse
+1. 
+```
+[
+    "message:Student Details Added Successfully"
+]
+```
+
+
+### Other Responses
+1. `400 Bad Request`
+
+**Description:** The request was malformed or some required data is missing or incorrect.
+
+**Possible Causes:**
+
+* Required fields like name, maths, chemistry, or physics are missing.
+  
+* Data types are incorrect (e.g., a string instead of a float for marks).
+
+* Invalid values (e.g., negative numbers for marks)
+
+### Example
+```python
+{
+  "error": "Bad Request",
+  "message": "Field 'maths' is required and must be a positive float."
+}
+```
+2. `409 Conflict`
+   
+**Description**: The request conflicts with an existing resource or violates a unique constraint.
+
+**Possible Causes**:
+
+A unique constraint on fields (if, for example, student names must be unique).
+
+### Example
+```python
+{
+  "error": "Conflict",
+  "message": "A student with this roll number already exists."
+}
+```
+3. `500 Internal Server Error`
+   
+**Description**: An unexpected error occurred on the server.
+
+**Possible Causes**:
+
+* Database issues, such as a connection error.
+
+* Unhandled server exception.
+  
+### Example
+```python
+{
+  "error": "Internal Server Error",
+  "message": "An error occurred while processing the request. Please try again later."
+}
+```
+
+1. Retrieve All Students
 
 * Endpoint: GET /student1/
 
