@@ -46,24 +46,16 @@ class Student1DetailView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-    # def delete(self,request,rollno):
-    #     try:
-    #         students1=Student1.objects.get(rollno=rollno)
-    #         name=students1.name
-    #         students1.delete()
-    #         return Response({'Student record deleted successfully'},status=status.HTTP_200_OK)
-    #     except Exception as e:
-    #         print(e)
-    #         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, rollno):
+    def delete(self,request,rollno):
         try:
-            student = Student1.objects.get(rollno=rollno)
-            student.is_active = False
-            student.save()
-            return Response({'Student record set to inactive successfully'}, status=status.HTTP_200_OK)
-        except Student1.DoesNotExist:
-            return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+            students1=Student1.objects.get(rollno=rollno)
+            name=students1.name
+            students1.delete()
+            return Response({'Student record deleted successfully'},status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class Student1Listtoppers(APIView):
     def get(self,request):
@@ -107,55 +99,27 @@ class StudentsubjectwisefailedlistView(APIView):
             'failedin_physics':Student1serializers(subjectwise_failures['failedin_physics'],many=True).data
         },status=status.HTTP_200_OK) 
 
-#is_active without using Active Manager
 
-class StudentbydeptView(APIView):
-    def get(self,request,dept_id):
-        student=Student1.objects.filter(dept_id=dept_id,is_active=True)
-        serializer=Student1serializers(student,many=True)
-        data=[{
-            'name':student['name'],
-            'rollno':student['rollno'],
-            'dept_id':student['dept_id'],
-            'sc_id':student['sc_id']
-        } for student in serializer.data
-        ]
-        return Response(data,status=status.HTTP_200_OK)
 
 #is_active with using Active Manager
 class Studentbydeptactview(APIView):
     def get(self,request,dept_id):
-        student=Student1.active_objects.filter(dept_id=dept_id)
-        serializer=Student1serializers(student,many=True)
-        data=[{
-            'name':student['name'],
-            'rollno':student['rollno'],
-            'dept_id':student['dept_id'],
-            'sc_id':student['sc_id']
-        } for student in serializer.data
-        ]
-        return Response(data,status=status.HTTP_200_OK)
+        student=Student1.active_objects.filter(dept_id=dept_id).values('name','rollno','dept_id','sc_id')
+        return Response(student,status=status.HTTP_200_OK)
 
-# fetching the student details based on the school under the same school
+
+# fetching the student details  under the same school
 
 class StudentbyscidView(APIView):
     def get(self,request,sc_id):
-        student=Student1.active_objects.filter(sc_id=sc_id)
-        serializer=Student1serializers(student,many=True)
-        data=[{
-            'name':student['name'],
-            'rollno':student['rollno'],
-            'dept_id':student['dept_id'],
-            'sc_id':student['sc_id']
-        } for student in serializer.data
-        ]
-        return Response(data,status=status.HTTP_200_OK)
+        student=Student1.active_objects.filter(sc_id=sc_id).values('name','rollno','dept_id','sc_id')
+        return Response(student,status=status.HTTP_200_OK)
 
 class Studentunderteacher(APIView):
     def get(self, request, teacher_id):
         teacher = Teacher2.objects.filter(emp_id=teacher_id).first()
         if not teacher:
-            return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Teacher not found"}, status=status.HTTP_204_NO_CONTENT)
         students = Student1.active_objects.filter(teacher_id=teacher_id)
         serializer = Student1serializers(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -165,6 +129,18 @@ class Studentunderdeptandschool(APIView):
         student=Student1.active_objects.filter(dept_id=dept_id,sc_id=sc_id)
         serializer=Student1serializers(student, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class StudentdeactivateView(APIView):
+    def put(self, request, rollno):
+        try:
+            student = Student1.objects.filter(rollno=rollno).update(rollno=None,is_active=False)
+            if student == 0:
+                return Response({'Student not found'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'Student record set to inactive successfully'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error":str(e)} ,status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class ActivestudView(APIView):
     def get(self,request):
