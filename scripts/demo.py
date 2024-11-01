@@ -1,6 +1,8 @@
 from App2.models import Student1
 from app_Teacher.models import Teacher2 
 from App2.utils import calculate_teacher_pass_percentage
+from app_School.models import School
+from app_Department.models import Departments
 
 
 
@@ -31,23 +33,45 @@ def datafetch():
         except Exception as e:
             print(f"An error occurred while updating student ID {student.name}: {e}")
 
-def update_teacher_performance():
-    teachers=Teacher2.objects.all()
-    for teacher in teachers:
-        try:
-            pass_percentage=calculate_teacher_pass_percentage(teacher.emp_id)
-            teacher.performance=pass_percentage
-            teacher.save()
-            print(f"Updated performance for Teacher ID {teacher.emp_id} ({teacher.name}) to {teacher.performance}%")
-        except Exception as e:
-            print(f"An error occurred while updating performance for Teacher ID {teacher.emp_id}: {e}")
+# def update_teacher_performance():
+#     teachers=Teacher2.objects.all()
+#     for teacher in teachers:
+#         try:
+#             pass_percentage=calculate_teacher_pass_percentage(teacher.emp_id)
+#             teacher.performance=pass_percentage
+#             teacher.save()
+#             print(f"Updated performance for Teacher ID {teacher.emp_id} ({teacher.name}) to {teacher.performance}%")
+#         except Exception as e:
+#             print(f"An error occurred while updating performance for Teacher ID {teacher.emp_id}: {e}")
+
+def assign_dept_to_all_schools():
+    try:
+        # Fetch all active schools
+        schools = School.active_objects.all()
+        
+        # Fetch all active departments
+        departments = Departments.active_objects.all()
+        
+        if not departments.exists():
+            print("No active departments to assign.")
+            return
+        # Iterate through each school and add departments
+        for school in schools:
+            school.departments.add(*departments)  # Assign all departments to the current school
+            print(f"All departments have been assigned to the school: {school.sc_name}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
 def run():
     print("Fetching the data")
     datafetch()
-    print("Updating teacher performance...")
-    update_teacher_performance()
- 
+    # print("Updating teacher performance...")
+    # update_teacher_performance()
+    print("Assigning departments to the school...")
+    assign_dept_to_all_schools()
+
 if __name__ == "__main__":
     run()
  

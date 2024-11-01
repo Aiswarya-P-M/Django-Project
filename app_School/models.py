@@ -13,8 +13,12 @@ class School(models.Model):
     created_on=models.DateTimeField(auto_now_add=True)
     updated_on=models.DateTimeField(auto_now=True)
     is_active=models.BooleanField(default=True)
+    departments=models.ManyToManyField('app_Department.Departments',related_name='school_departments_list')
 
     objects = models.Manager()  # The default manager
     active_objects = ActiveManager()
+
+    def __str__(self):
+       return self.sc_name
 
     
