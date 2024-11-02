@@ -10,7 +10,7 @@ This project mainly consists of 4 apps and 31 api endpoints.
 
 # API Endpoints of Student app
 
-1. Add New Student
+## 1. Add New Student
 
 * `URL`: http://127.0.0.1:8000/student1/
 
@@ -67,13 +67,12 @@ Content-Type: application/json
 }
 ```
 ### Example Reponse
-1. 
+1.` HTTP Status: 200 OK`
 ```
 [
     "message:Student Details Added Successfully"
 ]
 ```
-
 
 ### Other Responses
 1. `400 Bad Request`
@@ -128,632 +127,1675 @@ A unique constraint on fields (if, for example, student names must be unique).
 }
 ```
 
-1. Retrieve All Students
+### Messages
 
-* Endpoint: GET /student1/
-
-* Description: Fetches a list of all students in the system.
-
-3. Update Student Information
-
-* Endpoint: PUT /student1/<rollno>/
-
-* Description: Updates the information of a specific student using their roll number.
-
-4. Delete Student
-
-* Endpoint: DELETE /student1/<rollno>/
-
-* Description: Removes a student record from the database based on their roll number.
-
-Performance and Analysis API Endpoints
-
-1. Top 5 Students by Marks
-
-* Endpoint: GET /student1/listoftoppers/
-
-* Description: Returns a list of the top 5 students based on total marks.
-
-2. Students Above a Cutoff Score
-
-* Endpoint: GET /student1/listofcutoff/
-
-* Description: Lists students who scored above a cutoff mark (150).
-
-3. Failed Students
-
-* Endpoint: GET /student1/listoffailed/
-
-* Description: Lists students who scored below the passing threshold (35).
-
-4. Average Performance Analysis
-
-* Endpoint: GET /student1/listofaverage/
-
-* Description: Categorizes students into below or above average based on marks.
-
-5. Subject wise failed list
-   
-* Endpoint: GET /student1/subjectvice/
-
-* Description: Categorizes the subject wise failed students.
-
-### => Views.py Structure
-## CRUD operations
-1. get(self, request) - Retrieves all student records and returns them in JSON format.
-
-2. delete(self, request) - Deletes all student records from the database.
-
-3. post(self, request) - Creates new student records based on the provided data.
-   
-## Student1DetailView
-1. get(self, request, rollno) - Fetches a specific student's details by their roll number.
-
-2. put(self, request, rollno) - Updates a specific student's details by roll number.
-
-3. delete(self, request, rollno) - Deletes a specific student's record by roll number.
-   
-## Student1Listtoppers
-1. get(self, request) - Retrieves the top 5 students based on their total marks.
-   
-## Student1LitofcutoffsView
-1. get(self, request) - Lists students who scored above a total of 150 marks.
-   
-## Student1ListofFailedView
-1. get(self, request) - Lists students with a total score of 150 or below, indicating a failure status.
-
-## Student1ListofaverageView
-1. get(self, request) - Calculates the average mark and categorizes students into above or below average.
-
-## StudentsubjectwisefailedlistView
-1. get(self, request) - Lists students who failed in each subject, using a cutoff mark of 50.
-
-## =>URL Pattern
+1. Student with this roll number already exists.
 ```python
-from django.urls import path
-from .views import *
-
-urlpatterns=[
-    path('',Student1View.as_view(),name='list_student'),
-    path('byid/<int:rollno>',Student1DetailView.as_view(),name='studentdetails_byid'),
-    path('listoftoppers/',Student1Listtoppers.as_view(),name='studentlistoftoppers'),
-    path('listofcutoffs/',Student1LitofcutoffsView.as_view(),name='studentlistofcutoffs'),
-    path('listoffailed/',Student1ListofFailedView.as_view(),name='studentlistoffailed'),
-    path('listofaverage/',Student1ListofaverageView.as_view(),name='studentlistofaverage'),
-    path('subjectvice/',StudentsubjectwisefailedlistView.as_view(),name='subjectvicefailedlist'),
+{
+    "rollno": [
+        "Student with this roll number already exists."
+    ]
+}
 ```
-## =>utils.py
-
-The utils.py file contains utility functions that support calculations and data processing for student performance and teacher metrics in the application. These functions simplify complex operations and are reusable across different parts of the codebase.
-
+2. Required fields are missing.
 ```python
-from .models import *
-
-def calculate_average_marks(total_students: int, total_marks_sum: float):
-    return (total_marks_sum / total_students) if total_students > 0 else 0
-
-
-def get_subjectwise_failed(cutoff_marks):
-    failedin_maths=Student1.objects.filter(maths__lt=cutoff_marks)
-    failedin_chemistry=Student1.objects.filter(chemistry__lt=cutoff_marks)
-    failedin_physics=Student1.objects.filter(physics__lt=cutoff_marks)
-    return {
-            'failedin_maths':failedin_maths,
-            'failedin_chemistry':failedin_chemistry,
-            'failedin_physics':failedin_physics,
-    } 
-def calculate_teacher_pass_percentage(teacher_id):
-    # Count the total number of students for the given teacher
-    total_students = Student1.objects.filter(teacher_id=teacher_id).count()
-    
-    # Count passed students for the teacher (total_marks > 150)
-    passed_students_count = Student1.objects.filter(teacher_id=teacher_id, total_marks__gt=150).count()
-
-    if total_students > 0:
-        # Calculate pass percentage
-        pass_percentage = (passed_students_count / total_students) * 100
-        return round(pass_percentage,2)
-    
-    return 0
-```
-Function Descriptions
-
-```calculate_average_marks(total_students: int, total_marks_sum: float)```
-
-**Calculates the average marks for a group of students**.
-
-Parameters:
-
-```total_students```: The total number of students.
-
-`total_marks_sum`: The sum of marks for all students.
-
-`Returns`: Average marks or 0 if there are no students.
-
-**get_subjectwise_failed(cutoff_marks)**
-
-Retrieves students who scored below a specific cutoff mark in each subject.
-
-Parameters:
-
-`cutoff_marks`: The threshold score below which a student is considered to have failed.
-
-`Returns`: A dictionary with lists of students who failed in maths, chemistry, and physics.
-
-`calculate_teacher_pass_percentage(teacher_id)`
-
-**Calculates the pass percentage for a teacher’s students, based on the number of students who scored above 150.**
-
-Parameters:
-
-`teacher_id`: The ID of the teacher whose student pass rate is calculated.
-
-`Returns`: The pass percentage (rounded to two decimal places) or 0 if the teacher has no students.
-
-## **Teacher App**
-
-### => Models.py file
-```python
-from django.db import models
-from app_School.models import School  # Import School from the app_School app
-from app_Department.models import Departments  # Import Department from the app_Department app
-
-# Create your models here.
-class Teacher2(models.Model):
-    name=models.CharField(max_length=50)
-    emp_id=models.AutoField(primary_key=True)
-    performance=models.FloatField(default=0)
-    created_on=models.DateTimeField(auto_now_add=True)
-    updated_on=models.DateTimeField(auto_now=True)
-    sc_id = models.ForeignKey('app_School.School', on_delete=models.DO_NOTHING,null=True,blank=True)
-    dept_id=models.ForeignKey('app_Department.Departments', on_delete=models.DO_NOTHING, null=True, blank=True)
-```
-The `Teacher2` model represents teachers and includes fields for personal details, performance metrics, and associations with school and department.
-
-### Field Descriptions
-
-- **name**: Stores the teacher's name as a character field, with a maximum length of 50.
-- **emp_id**: An auto-incremented primary key field that uniquely identifies each teacher.
-- **performance**: A float field representing the teacher's performance score, with a default value of 0.
-- **created_on**: Automatically captures the timestamp when a teacher record is created.
-- **updated_on**: Automatically updates the timestamp whenever a teacher record is modified.
-- **sc_id**: A foreign key linking to a `School` model from `app_School`, indicating the school associated with the teacher.
-- **dept_id**: A foreign key linking to a `Departments` model from `app_Department`, representing the department associated with the teacher. 
-
-This model allows for capturing essential information about each teacher, their affiliation, and performance metrics.
-
-### => Admin Registration
-```python
-admin.site.register(Teacher2)
-```
-### => Serializers
-```python
-class Teacherserializers(serializers.ModelSerializer):
-    sc_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
-    dept_id = serializers.PrimaryKeyRelatedField(queryset=Departments.objects.all())
-    class Meta:
-        model=Teacher
-        fields="__all__"
-```
-The `Teacherserializers` class is a Django REST Framework serializer for the `Teacher` model, handling all fields (`fields="__all__"`). It includes:
-
-- **sc_id** and **dept_id**: Allow write access by accepting primary keys for related `School` and `Departments` instances.
-
-This serializer enables full CRUD operations for teacher records via the API.
-### => API Endpoints
-
-Here are the API endpoints for the Teacher app, organized by CRUD operations followed by additional functions:
-
-### Teacher API Endpoints
-
-#### CRUD Operations
-
-1. **Add New Teacher**
-   - **Endpoint**: `POST /teacher/`
-   - **Description**: Adds a new teacher record with details such as name and department.
-
-2. **Retrieve All Teachers**
-   - **Endpoint**: `GET /teacher/`
-   - **Description**: Returns a list of all teachers in the system.
-
-3. **Get Teacher Details**
-   - **Endpoint**: `GET /teacher/<teacher_id>/`
-   - **Description**: Fetches details of a specific teacher by their employee ID.
-
-4. **Delete All Teachers**
-   - **Endpoint**: `DELETE /teacher/`
-   - **Description**: Deletes all teacher records from the database.
-
-5. **Update Student Performance on Addition**
-   - **Endpoint**: `POST /teacher/updateperbyadd/`
-   - **Description**: Adds a new student and updates the associated teacher's performance percentage.
-
-6. **Delete Student and Update Teacher Performance**
-   - **Endpoint**: `DELETE /teacher/performanceupdate/<int:rollno>/`
-   - **Description**: Deletes a specific student record by roll number and updates the associated teacher's performance percentage.
-
-7. **Update Student Information and Teacher Performance**
-   - **Endpoint**: `PUT /teacher/performanceupdate/<int:rollno>/`
-   - **Description**: Updates a specific student's details and adjusts the associated teacher's performance percentage accordingly.
-
-#### Performance and Analysis Functions
-
-1. **Get Teacher Performance Overview**
-   - **Endpoint**: `GET /teacher/performance/`
-   - **Description**: Retrieves a list of teachers categorized as best performers (≥ 75% pass rate) and those needing improvement.
-
-## => Structure of views.py
-Here's a more concise explanation of the `views.py` file:
-
-### `views.py` Overview
-
-1. **TeacherPerformanceView** (`get(self, request)`)
-   - Retrieves and categorizes teachers based on pass percentage, identifying top performers.
-
-2. **teacherdetailsView** (`get(self, request, teacher_id)`)
-   - Fetches details of a specific teacher by `teacher_id`. Returns a 404 error if not found.
-
-3. **TeacherallDetailsView**
-   - **`get(self, request)`**: Lists all teachers.
-   - **`post(self, request)`**: Adds new teacher records if valid; returns errors if invalid.
-   - **`delete(self, request)`**: Deletes all teacher records.
-
-4. **updateperbyaddView** (`post(self, request)`)
-   - Adds a new student and updates the associated teacher's performance. Returns an error if no teacher is linked.
-
-5. **performanceupdateView**
-   - **`delete(self, request, rollno)`**: Deletes a student by `rollno` and updates the teacher's performance; returns errors if not found.
-   - **`put(self, request, rollno)`**: Updates a student's details and recalculates the teacher's performance; returns errors if validation fails.
-
-## =>URL Pattern
-```python
-from django.urls import path
-from .views import *
-
-urlpatterns=[
-    path('teachperformance/',TeacherPerformanceView.as_view(),name='teachersperformance'),
-    path('byid/<int:teacher_id>/',teacherdetailsView.as_view(),name='teacherdetails'),
-    path('crud/',TeacherallDetailsView.as_view(),name='teachersalldetails'),
-    path('updateperbyadd/',updateperbyaddView.as_view(),name='updateper'),
-    path('performanceupdate/<int:rollno>/',performanceupdateView.as_view(),name='performanceupdate'),
-    
-
-]
-```
-### => Overview of Scripts.py file
-
-
-This script performs two main tasks: updating student-teacher associations and recalculating teacher performance metrics.
-
-```python
-from App2.models import Student1
-from app_Teacher.models import Teacher2 
-from App2.utils import calculate_teacher_pass_percentage
-
-
-
-def datafetch():
-
-    # Fetch all teacher employee IDs
-    teacher_ids = Teacher2.objects.values_list('emp_id', flat=True)
-    print("Teacher IDs:", list(teacher_ids))
-
-    # Fetch all students
-    students = Student1.objects.all()
-
-    # Iterate through all students
-    for student in students:
-        try:
-            # Get the teacher based on the student's teacher ID
-            if student.teacher_id in teacher_ids:  # Ensure the teacher exists
-                teacher = Teacher2.objects.get(emp_id=student.teacher_id)
-                student.teacher_id = teacher  # Assign the teacher to the student
-                student.save()  # Save the changes
-
-                # Print confirmation for each student update
-                print(f"Updated student ID {student.name} ({student.name}) with teacher ID {teacher.emp_id} ({teacher.name})")
-            else:
-                print(f"No matching teacher ID {student.teacher_id} for student ID {student.name} ({student.name}).")
-        except Teacher2.DoesNotExist:
-            print(f"Teacher with ID {student.teacher_id} does not exist for student ID {student.name} ({student.name}).")
-        except Exception as e:
-            print(f"An error occurred while updating student ID {student.name}: {e}")
-
-def update_teacher_performance():
-    teachers=Teacher2.objects.all()
-    for teacher in teachers:
-        try:
-            pass_percentage=calculate_teacher_pass_percentage(teacher.emp_id)
-            teacher.performance=pass_percentage
-            teacher.save()
-            print(f"Updated performance for Teacher ID {teacher.emp_id} ({teacher.name}) to {teacher.performance}%")
-        except Exception as e:
-            print(f"An error occurred while updating performance for Teacher ID {teacher.emp_id}: {e}")
-
-def run():
-    print("Fetching the data")
-    datafetch()
-    print("Updating teacher performance...")
-    update_teacher_performance()
- 
-if __name__ == "__main__":
-    run()
- 
+{
+    "physics": [
+        "This field is required."
+    ]
+}
 ```
 
-1. **Function: `datafetch()`**
-   - **Purpose**: Associates each student with their corresponding teacher.
-   - **Process**:
-     - Retrieves teacher IDs from the `Teacher2` model.
-     - Iterates through all students, checking if their `teacher_id` exists among the fetched IDs.
-     - Updates students with the appropriate teacher object and saves the changes, printing confirmation or error messages.
 
-2. **Function: `update_teacher_performance()`**
-   - **Purpose**: Updates the performance percentage for each teacher.
-   - **Process**:
-     - Iterates through all teachers and calculates their pass percentage using the utility function `calculate_teacher_pass_percentage()`.
-     - Updates the teacher's performance attribute and saves it, printing confirmation or error messages.
 
-3. **Function: `run()`**
-   - **Purpose**: Executes the main tasks of the script.
-   - **Process**:
-     - Calls `datafetch()` to update student-teacher links.
-     - Calls `update_teacher_performance()` to refresh teachers' performance metrics.
+## 2. Retrieve Student Details
 
-4. **Execution Block**:
-   - The script runs the `run()` function when executed as the main module.
+* `URL`: http://127.0.0.1:8000/student1/
+
+* `Method` : GET
+
+* `Description`: Retrieves all the student records.
+
+* `Content-type`:
   
+         Content-Type: application/json
 
-## **School App**
 
-### => Models.py file
-```python
-from django.db import models
-# from app_Department import models as department_models
-# Create your models here.
+### Example Request
 
-class School(models.Model):
-    sc_name=models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
-    sc_id=models.AutoField(primary_key=True)
-    created_on=models.DateTimeField(auto_now_add=True)
-    updated_on=models.DateTimeField(auto_now=True)
-
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
 ```
-This models.py file defines the School model for a Django application, representing educational institutions in the database.
-
-School Model
-
-Attributes:
-
-`sc_name`: A character field (string) for the school's name, with a maximum length of 100 characters.
-
-`location`: A character field for the school's location, also with a maximum length of 100 characters.
-
-`sc_id`: An auto-incrementing primary key field that uniquely identifies each school.
-
-`created_on`: A timestamp that records when the school record was created, automatically set upon creation.
-
-`updated_on`: A timestamp that updates automatically whenever the school record is modified.
-
-### => Admin Registration
+### Example Reponse
+1. 
 ```python
-admin.site.register(School)
+{
+        "rollno": 1,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 60.0,
+        "chemistry": 60.0,
+        "physics": 40.0,
+        "total_marks": 160.0,
+        "percentage": 53.333333333333336,
+        "created_on": "2024-10-25T08:08:28.189842Z",
+        "updated_on": "2024-11-02T05:34:17.978209Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    }
 ```
-### => Serializers
+### Other Responses
+
+1. No Data Available
+
+* HTTP Status: 200 OK
+
+* Description: The request was successful, but no student records are available.
+
+Example Response:
 ```python
-class SchoolSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = School
-        fields = '__all__'
+[]
 ```
 
+2. Internal Server Error
 
-This file defines the `SchoolSerializer`, which is used for converting `School` model instances to and from JSON for API communication.
+* HTTP Status: 500 Internal Server Error
 
-#### `SchoolSerializer` Class
+* Description: An unexpected server error occurred.
 
-- **Inherits from**: `serializers.ModelSerializer`.
-- **Meta Class**:
-  - **model**: Links to the `School` model.
-  - **fields**: Set to `'__all__'`, including all model fields in serialization.
+* Possible Causes: Database issues, unhandled exceptions, or misconfiguration.
 
-### => API Endpoints
-
-Here are the API endpoints for the School app, organized by CRUD operations followed by additional functions:
-
-### School API Endpoints
-
-#### CRUD Operations
-
-1. **Add New School**
-   - **Endpoint**: `POST /school/`
-   - **Description**: Adds a new school record with details such as school name,location and id.
-
-2. **Retrieve All School**
-   - **Endpoint**: `GET /school/`
-   - **Description**: Returns a list of all school in the database.
-
-3. **Get School Details**
-   - **Endpoint**: `GET /school/<sc_id>/`
-   - **Description**: Fetches details of a specific school by the school ID.
-
-4. **Delete All School data**
-   - **Endpoint**: `DELETE /school/`
-   - **Description**: Deletes all school records from the database.
-
-5. **Update School by school id**
-   - **Endpoint**: `PUT /school/byid/<int:sc_id>`
-   - **Description**: Update school details.
-
-6. **Delete School by id**: `DELETE /school/byid/<int:sc_id>/`
-   - **Description**: Deletes a specific school record by school id.
-
-## => Structure of views.py
-Here's a more concise explanation of the `views.py` file:
-
-### `SchoolcreateView` Class
-Handles creating and retrieving school records.
-
-- **`get(self, request)`**: 
-  - Retrieves all school records and returns them as a JSON response with a 200 OK status.
-
-- **`post(self, request)`**: 
-  - Validates and saves new school data. Responds with a success message (201 Created) or validation errors (400 Bad Request).
-
-- **`delete(self, request)`**: 
-  - Deletes all school records. Returns a success message or a 400 Bad Request on error.
-
-### `SchooldetailsView` Class
-Manages individual school records by ID.
-
-- **`get(self, request, sc_id)`**: 
-  - Fetches a school record by its ID and returns it as a JSON response. Returns a 404 Not Found error if not found.
-
-- **`put(self, request, sc_id)`**: 
-  - Updates the specified school record with new data. Returns a success message or validation errors.
-
-- **`delete(self, request, sc_id)`**: 
-  - Deletes the specified school record and returns a success message or a 404 Not Found error if the record does not exist.
-
-### Summary
-These views provide CRUD operations for school records, managing both collections and individual records effectively.
-
-## =>URL Pattern
 ```python
-from django.urls import path
-from .views import *
+{
+  "error": "Internal Server Error",
+  "message": "An error occurred while processing the request. Please try again later."
+}
+```
 
-urlpatterns=[
-    path('',SchoolcreateView.as_view(),name='create_school'),
-    path('byid/<int:sc_id>',SchooldetailsView.as_view(),name='school_details')
+### Example Messages
+
+1. No Data Available.
+```python
+[]
+```
+`Cause`: The request was successful, but there are no student records in the database.
+
+`Solution`: No action needed, but you may want to add student records to the database.
+
+2. Page Not Found
+   
+* `HTTP Status: 404 Not Found`
+```python
+{
+  "detail": "Not found."
+}
+
+```
+
+- **Cause**:
+  - **Incorrect URL**: The requested URL doesn’t match any defined route.
+  
+  - **Resource Missing**: The specific item (e.g., student ID) doesn’t exist in the database.
+  - **Routing Issue**: The route might not be properly defined in `urls.py`.
+
+- **Solution**:
+  - **Check URL**: Ensure the URL and any IDs are correct.
+  - **Validate Resource**: Confirm the resource exists in the database.
+  - **Review URL Config**: Verify the endpoint is correctly set up in `urls.py`. 
+
+## 3. Retrieve Student Details by rollno
+
+* `URL`: http://127.0.0.1:8000/student1/byid/<int:rollno>
+
+* `Method` : GET
+
+* `Description`: Retrieves  the student records by rollno.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    "rollno": 3,
+    "teacher_id": 3,
+    "name": "Rahul Kumar",
+    "maths": 82.0,
+    "chemistry": 77.5,
+    "physics": 84.0,
+    "total_marks": 243.5,
+    "percentage": 81.16666666666667,
+    "created_on": "2024-10-25T08:08:28.217296Z",
+    "updated_on": "2024-11-02T05:34:34.747297Z",
+    "is_active": true,
+    "sc_id": 2,
+    "dept_id": 1
+}
+```
+### Other Responses
+
+### 1. **Student Not Found**
+
+   - **HTTP Status**: `404 Not Found`
+   - **Description**: The student with the specified roll number does not exist.
+   - **Example Response**:
+     ```json
+     {
+       "detail": "Student with roll number 123 not found."
+     }
+     ```
+
+### 2. **Bad Request**
+
+   - **HTTP Status**: `400 Bad Request`
+   - **Description**: The request is malformed or the roll number format is incorrect.
+   - **Example Response**:
+     ```json
+     {
+       "error": "Bad Request",
+       "message": "Roll number must be a valid integer."
+     }
+     ```
+
+### 3. **Internal Server Error**
+
+   - **HTTP Status**: `500 Internal Server Error`
+   - **Description**: An unexpected server error occurred during the request processing.
+   - **Example Response**:
+     ```json
+     {
+       "error": "Internal Server Error",
+       "message": "An error occurred while processing the request. Please try again later."
+     }
+     ```
+### Example Messages
+
+### 1. **Successful Retrieval of Student Details**
+
+- **HTTP Status**: `200 OK`
+- **Response Message**:
+  ```json
+  {
+    "dept_id": 1,
+    "sc_id": 1,
+    "teacher_id": 1,
+    "rollno": 123,
+    "chemistry": 85.0,
+    "maths": 90.0,
+    "physics": 80.0,
+    "total_marks": 255.0,
+    "percentage": 85.0
+  }
+  ```
+
+### 2. **Student Not Found**
+
+  ```json
+  {
+    "detail": "Student with ID 1 not found."
+  }
+  ```
+- **Cause**: The ID provided does not match any existing student record.
+- **Solution**: Check the ID used in the request and ensure it corresponds to an existing student.
+
+### 3. **Bad Request**
+- **Response Message**:
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "ID must be a valid integer."
+  }
+  ```
+- **Cause**: The ID provided is not in a valid format (e.g., a string instead of an integer).
+- **Solution**: Ensure that the ID is provided as a valid integer in the request.
+
+### 4. **Internal Server Error**
+
+- **Response Message**:
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An error occurred while processing the request. Please try again later."
+  }
+  ```
+- **Cause**: An unexpected error occurred during the request processing, such as a database issue.
+- **Solution**: Check server logs for details about the error and address any underlying issues (e.g., database connectivity).
+
+## 4. Update Student Details
+
+* `URL`: http://127.0.0.1:8000/student1/byid/<int:rollno>
+
+* `Method` : PUT
+
+* `Description`: Update student details.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+PUT /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    "message": "Student detail updated succesfully"
+}
+```
+### Other Responses
+
+### 1. **Student Not Found**
+
+   - **HTTP Status**: `404 Not Found`
+   - **Description**: The student with the specified roll number does not exist.
+   - **Example Response**:
+     ```json
+     {
+       "detail": "Student with roll number 123 not found."
+     }
+     ```
+
+### 2. **Bad Request**
+
+   - **HTTP Status**: `400 Bad Request`
+   - **Description**: The request is malformed or the roll number format is incorrect.
+   - **Example Response**:
+     ```json
+     {
+       "error": "Bad Request",
+       "message": "Roll number must be a valid integer."
+     }
+     ```
+
+### 3. **Internal Server Error**
+
+   - **HTTP Status**: `500 Internal Server Error`
+   - **Description**: An unexpected server error occurred during the request processing.
+   - **Example Response**:
+     ```json
+     {
+       "error": "Internal Server Error",
+       "message": "An error occurred while processing the request. Please try again later."
+     }
+     ```
+### Example Messages
+
+### 1. **Successful Retrieval of Student Details**
+
+- **HTTP Status**: `200 OK`
+- **Response Message**:
+  ```json
+  {
+    "message": "Student detail updated succesfully"
+   }
+  ```
+
+### 2. **Student Not Found**
+
+  ```json
+  {
+    "detail": "Student with ID 1 not found."
+  }
+  ```
+- **Cause**: The ID provided does not match any existing student record.
+- **Solution**: Check the ID used in the request and ensure it corresponds to an existing student.
+
+### 3. **Bad Request**
+- **Response Message**:
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "ID must be a valid integer."
+  }
+  ```
+- **Cause**: The ID provided is not in a valid format (e.g., a string instead of an integer).
+- **Solution**: Ensure that the ID is provided as a valid integer in the request.
+
+### 4. **Internal Server Error**
+
+- **Response Message**:
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An error occurred while processing the request. Please try again later."
+  }
+  ```
+- **Cause**: An unexpected error occurred during the request processing, such as a database issue.
+- **Solution**: Check server logs for details about the error and address any underlying issues (e.g., database connectivity).
+
+
+## 5. Delete Student Details
+
+* `URL`: http://127.0.0.1:8000/student1/byid/<int:rollno>
+
+* `Method` : DELETE
+
+* `Description`: Delete student details.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+DELETE /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    "Student record deleted successfully"
 ]
 ```
-## **Department App**
+### Other Responses
 
-### => Models.py file
-```python
-from django.db import models
-# from app_School import models as school_model
-# from App2 import models as Teacher_model
-# Create your models here.
-# from App2.models import Teacher
+### 1. **Student Not Found**
 
-class Departments(models.Model):
-    hod_name=models.ForeignKey('app_Teacher.Teacher2',on_delete=models.DO_NOTHING,null=True,blank=True)
-    dept_name=models.CharField(max_length=100)
-    dept_id=models.AutoField(primary_key=True)
-    sc_id = models.ForeignKey('app_School.School', on_delete=models.DO_NOTHING,null=True,blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on=models.DateTimeField(auto_now=True)
-    
+   - **HTTP Status**: `404 Not Found`
+   - **Description**: The student with the specified roll number does not exist.
+   - **Example Response**:
+     ```json
+     {
+       "detail": "Student with roll number 123 not found."
+     }
+     ```
+
+### 2. **Bad Request**
+
+   - **HTTP Status**: `400 Bad Request`
+   - **Description**: The request is malformed or the roll number format is incorrect.
+   - **Example Response**:
+     ```json
+     {
+       "error": "Bad Request",
+       "message": "Roll number must be a valid integer."
+     }
+     ```
+
+### 3. **Internal Server Error**
+
+   - **HTTP Status**: `500 Internal Server Error`
+   - **Description**: An unexpected server error occurred during the request processing.
+   - **Example Response**:
+     ```json
+     {
+       "error": "Internal Server Error",
+       "message": "An error occurred while processing the request. Please try again later."
+     }
+     ```
+### Example Messages
+
+### 1. **Successful Retrieval of Student Details**
+
+- **HTTP Status**: `200 OK`
+- **Response Message**:
+  ```json
+  {
+    "message": 
+    "Student record deleted successfully"
+   }
+  ```
+
+### 2. **Student Not Found**
+
+  ```json
+  {
+    "detail": "Student with ID 1 not found."
+  }
+  ```
+- **Cause**: The ID provided does not match any existing student record.
+- **Solution**: Check the ID used in the request and ensure it corresponds to an existing student.
+
+### 3. **Bad Request**
+- **Response Message**:
+  ```json
+  {
+    "error": "Bad Request",
+    "message": "ID must be a valid integer."
+  }
+  ```
+- **Cause**: The ID provided is not in a valid format (e.g., a string instead of an integer).
+- **Solution**: Ensure that the ID is provided as a valid integer in the request.
+
+### 4. **Internal Server Error**
+
+- **Response Message**:
+  ```json
+  {
+    "error": "Internal Server Error",
+    "message": "An error occurred while processing the request. Please try again later."
+  }
+  ```
+- **Cause**: An unexpected error occurred during the request processing, such as a database issue.
+- **Solution**: Check server logs for details about the error and address any underlying issues (e.g., database connectivity).
+
+## 6. List of Toppers
+
+* `URL`: http://127.0.0.1:8000/student1/listoftoppers/
+
+* `Method` : GET
+
+* `Description`: returning the top 5 students with the highest total marks .
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
 ```
-The `models.py` file defines a `Departments` model with the following fields:
-
-- **`hod_name`**: A foreign key linking to the `Teacher2` model, representing the head of the department. It can be null or blank.
-- **`dept_name`**: A character field for the name of the department, limited to 100 characters.
-- **`dept_id`**: An auto-incrementing primary key for the department.
-- **`sc_id`**: A foreign key linking to the `School` model, representing the school to which the department belongs. It can also be null or blank.
-- **`created_on`**: A timestamp indicating when the department record was created, automatically set.
-- **`updated_on`**: A timestamp indicating when the department record was last updated, automatically set.
-
-This model facilitates the organization of departments within schools and associates them with their respective heads and schools.
-
-### => Admin Registration
+### Example Reponse
+1. HTTP Status: 200 OK
 ```python
-admin.site.register(Department)
-```
-### => Serializers
-```python
-from rest_framework import serializers
-from .models import Departments
-from app_School.models import School
-
-class DeptSerializer(serializers.ModelSerializer):
-    sc_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
-    class Meta:
-        model = Departments
-        fields = '__all__'
-```
-The `serializers.py` file defines a `DeptSerializer` class, which is a serializer for the `Departments` model. Here's a brief explanation:
-
-- **`DeptSerializer`**: This class inherits from `serializers.ModelSerializer`, allowing it to automatically handle the serialization and deserialization of `Departments` instances.
-- **`sc_id`**: This field is a `PrimaryKeyRelatedField`, which establishes a relationship with the `School` model. It ensures that only valid school IDs from the `School` queryset can be assigned.
-- **`Meta` class**: Specifies the model to be serialized (`Departments`) and includes all fields from the model (`fields = '__all__'`).
-
-Overall, this serializer facilitates the conversion of `Departments` model instances to and from JSON format, ensuring that relationships with the `School` model are properly handled.
-
-### => API Endpoints
-
-Here are the API endpoints for the Department app, organized by CRUD operations followed by additional functions:
-
-### Department API Endpoints
-
-#### CRUD Operations
-
-1. **Add New Department**
-   - **Endpoint**: `POST /dept/`
-   - **Description**: Adds a new department record with details such as department name,hod name department id and school id.
-
-2. **Retrieve All Departments**
-   - **Endpoint**: `GET /dept/`
-   - **Description**: Returns a list of all departments in the database.
-
-3. **Get Department Details**
-   - **Endpoint**: `GET /dept/byid/<int:dept_id>`
-   - **Description**: Fetches details of a specific department by the department ID.
-
-4. **Delete All Department data**
-   - **Endpoint**: `DELETE /dept/`
-   - **Description**: Deletes all department records from the database.
-
-5. **Update Department by Department id**
-   - **Endpoint**: `PUT /dept/byid/<int:dept_id>`
-   - **Description**: Update Department details.
-
-6. **Delete Department by id**: `DELETE /dept/byid/<int:dept_id>`
-   - **Description**: Deletes a specific department record by department id.
-
-## => Structure of views.py
-Here's a more concise explanation of the `views.py` file:
-
-### `DeptcreateView(APIView)`
-
-1. **`get(self, request)`**:
-   - Fetches all departments.
-   - Returns a JSON list of departments with a 200 OK status.
-
-2. **`post(self, request)`**:
-   - Adds new departments based on request data.
-   - Returns a success message with a 201 Created status if valid; otherwise, validation errors with a 400 Bad Request status.
-
-3. **`delete(self, request)`**:
-   - Deletes all departments.
-   - Returns a success message with a 200 OK status; returns a 400 Bad Request on error.
-
-### `DeptdetailsView(APIView)`
-
-4. **`get(self, request, dept_id)`**:
-   - Retrieves a specific department by its ID.
-   - Returns department details with a 200 OK status or an error message with a 404 Not Found status if not found.
-
-5. **`put(self, request, dept_id)`**:
-   - Updates a department's details.
-   - Returns a success message with a 200 OK status if successful; otherwise, validation errors with a 400 Bad Request status.
-
-6. **`delete(self, request, dept_id)`**:
-   - Deletes a specific department by its ID.
-   - Returns a success message with a 200 OK status if found and deleted; returns a 404 Not Found status if not found.
-
-This file implements CRUD operations for department records in a Django REST framework application.
-
-## =>URL Pattern
-```python
-from django.urls import path
-from .views import *
-
-urlpatterns=[
-    path('',DeptcreateView.as_view(),name='create_department'),
-    path('byid/<int:dept_id>',DeptdetailsView.as_view(),name='department_details')
+[
+    {
+        "rollno": 26,
+        "teacher_id": 6,
+        "name": "Ravi Varma",
+        "maths": 92.5,
+        "chemistry": 95.0,
+        "physics": 94.0,
+        "total_marks": 281.5,
+        "percentage": 93.83333333333333,
+        "created_on": "2024-10-25T08:08:28.458971Z",
+        "updated_on": "2024-10-25T08:08:28.458971Z",
+        "is_active": false,
+        "sc_id": 3,
+        "dept_id": 3
+    },
+    {
+        "rollno": 6,
+        "teacher_id": 6,
+        "name": "Lakshmi Raj",
+        "maths": 91.0,
+        "chemistry": 90.0,
+        "physics": 95.0,
+        "total_marks": 276.0,
+        "percentage": 92.0,
+        "created_on": "2024-10-25T08:08:28.252434Z",
+        "updated_on": "2024-10-25T08:08:28.252434Z",
+        "is_active": false,
+        "sc_id": 3,
+        "dept_id": 4
+    },
 ]
 ```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 7. List of Cutoff
+
+* `URL`: http://127.0.0.1:8000/student1/listofcutoffs/
+
+* `Method` : GET
+
+* `Description`:  Retrieve and return a list of Student data whose total marks are greater than 150.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    {
+        "rollno": 1,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 60.0,
+        "chemistry": 60.0,
+        "physics": 40.0,
+        "total_marks": 160.0,
+        "percentage": 53.333333333333336,
+        "created_on": "2024-10-25T08:08:28.189842Z",
+        "updated_on": "2024-11-02T05:34:17.978209Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    },
+    {
+        "rollno": 2,
+        "teacher_id": 2,
+        "name": "Sreelakshmi Nair",
+        "maths": 75.5,
+        "chemistry": 80.0,
+        "physics": 88.0,
+        "total_marks": 243.5,
+        "percentage": 81.16666666666667,
+        "created_on": "2024-10-25T08:08:28.208347Z",
+        "updated_on": "2024-11-02T05:34:26.010235Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": null
+    },
+]
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 8. List of Failed Students
+
+* `URL`: http://127.0.0.1:8000/student1/listoffailed/
+
+* `Method` : GET
+
+* `Description`:  Retrieve and return a failed list of Student.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    {
+        "rollno": 27,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 30.0,
+        "chemistry": 30.5,
+        "physics": 30.0,
+        "total_marks": 90.5,
+        "percentage": 30.166666666666668,
+        "created_on": "2024-10-25T08:23:07.686470Z",
+        "updated_on": "2024-10-29T06:33:15.755303Z",
+        "is_active": false,
+        "sc_id": 1,
+        "dept_id": 1
+    },
+]
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 9. List of  Students above and below average.
+
+* `URL`: http://127.0.0.1:8000/student1/listofaverage/
+
+* `Method` : GET
+
+* `Description`:  Lists of students who scored above and below the average marks.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    "average_marks": 224.11428571428573,
+    "students_above_average": [
+        {
+            "rollno": 2,
+            "teacher_id": 2,
+            "name": "Sreelakshmi Nair",
+            "maths": 75.5,
+            "chemistry": 80.0,
+            "physics": 88.0,
+            "total_marks": 243.5,
+            "percentage": 81.16666666666667,
+            "created_on": "2024-10-25T08:08:28.208347Z",
+            "updated_on": "2024-11-02T05:34:26.010235Z",
+            "is_active": true,
+            "sc_id": 1,
+            "dept_id": null
+        },
+    ]
+    "students_below_average": [
+        {
+            "rollno": 1,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 60.0,
+            "chemistry": 60.0,
+            "physics": 40.0,
+            "total_marks": 160.0,
+            "percentage": 53.333333333333336,
+            "created_on": "2024-10-25T08:08:28.189842Z",
+            "updated_on": "2024-11-02T05:34:17.978209Z",
+            "is_active": true,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+}
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+
+## 10. Subjectwise Failed list of students.
+
+* `URL`: http://127.0.0.1:8000/student1/subjectvice/
+
+* `Method` : GET
+
+* `Description`: It retrieves the subjectwise failed list of students.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    "failedin_maths": [
+        {
+            "rollno": 27,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 30.0,
+            "chemistry": 30.5,
+            "physics": 30.0,
+            "total_marks": 90.5,
+            "percentage": 30.166666666666668,
+            "created_on": "2024-10-25T08:23:07.686470Z",
+            "updated_on": "2024-10-29T06:33:15.755303Z",
+            "is_active": false,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+    "failedin_chemistry": [
+        {
+            "rollno": 27,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 30.0,
+            "chemistry": 30.5,
+            "physics": 30.0,
+            "total_marks": 90.5,
+            "percentage": 30.166666666666668,
+            "created_on": "2024-10-25T08:23:07.686470Z",
+            "updated_on": "2024-10-29T06:33:15.755303Z",
+            "is_active": false,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+    "failedin_physics": [
+        {
+            "rollno": 1,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 60.0,
+            "chemistry": 60.0,
+            "physics": 40.0,
+            "total_marks": 160.0,
+            "percentage": 53.333333333333336,
+            "created_on": "2024-10-25T08:08:28.189842Z",
+            "updated_on": "2024-11-02T05:34:17.978209Z",
+            "is_active": true,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+}
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 11. Students under the same department.
+
+* `URL`: http://127.0.0.1:8000/student1/bydept/<int:dept_id>/
+
+* `Method` : GET
+
+* `Description`: It retrieves the list of students under the same department.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    [
+    {
+        "rollno": 1,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 60.0,
+        "chemistry": 60.0,
+        "physics": 40.0,
+        "total_marks": 160.0,
+        "percentage": 53.333333333333336,
+        "created_on": "2024-10-25T08:08:28.189842Z",
+        "updated_on": "2024-11-02T05:34:17.978209Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    },
+    {
+        "rollno": 3,
+        "teacher_id": 4,
+        "name": "Rahul Kumar",
+        "maths": 82.0,
+        "chemistry": 77.5,
+        "physics": 84.0,
+        "total_marks": 243.5,
+        "percentage": 81.16666666666667,
+        "created_on": "2024-10-25T08:08:28.217296Z",
+        "updated_on": "2024-11-02T18:57:16.210370Z",
+        "is_active": true,
+        "sc_id": 2,
+        "dept_id": 1
+    },
+    ]
+}
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 12. Students under the same school.
+
+* `URL`: http://127.0.0.1:8000/student1/byscid/<int:sc_id>
+
+* `Method` : GET
+
+* `Description`: It retrieves the list of students under the same school.
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    "failedin_maths": [
+        {
+            "rollno": 27,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 30.0,
+            "chemistry": 30.5,
+            "physics": 30.0,
+            "total_marks": 90.5,
+            "percentage": 30.166666666666668,
+            "created_on": "2024-10-25T08:23:07.686470Z",
+            "updated_on": "2024-10-29T06:33:15.755303Z",
+            "is_active": false,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+    "failedin_chemistry": [
+        {
+            "rollno": 27,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 30.0,
+            "chemistry": 30.5,
+            "physics": 30.0,
+            "total_marks": 90.5,
+            "percentage": 30.166666666666668,
+            "created_on": "2024-10-25T08:23:07.686470Z",
+            "updated_on": "2024-10-29T06:33:15.755303Z",
+            "is_active": false,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+    "failedin_physics": [
+        {
+            "rollno": 1,
+            "teacher_id": 1,
+            "name": "Anu",
+            "maths": 60.0,
+            "chemistry": 60.0,
+            "physics": 40.0,
+            "total_marks": 160.0,
+            "percentage": 53.333333333333336,
+            "created_on": "2024-10-25T08:08:28.189842Z",
+            "updated_on": "2024-11-02T05:34:17.978209Z",
+            "is_active": true,
+            "sc_id": 1,
+            "dept_id": 1
+        },
+    ]
+}
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 13. Students unde the same teacher.
+
+* `URL`: http://127.0.0.1:8000/student1/stdunderteacher/<int:teacher_id>/
+
+* `Method` : GET
+
+* `Description`: It retrieves the list of students under the same teacher.
+
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    {
+        "rollno": 1,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 60.0,
+        "chemistry": 60.0,
+        "physics": 40.0,
+        "total_marks": 160.0,
+        "percentage": 53.333333333333336,
+        "created_on": "2024-10-25T08:08:28.189842Z",
+        "updated_on": "2024-11-02T05:34:17.978209Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    },
+    {
+        "rollno": 44,
+        "teacher_id": 1,
+        "name": "Rahul",
+        "maths": 85.0,
+        "chemistry": 90.0,
+        "physics": 30.0,
+        "total_marks": 205.0,
+        "percentage": 68.33333333333333,
+        "created_on": "2024-11-02T18:00:45.936041Z",
+        "updated_on": "2024-11-02T18:00:45.936041Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    }
+]
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 14. Students under same department and school.
+
+* `URL`: http://127.0.0.1:8000/student1/studentbydept&sc/<int:dept_id>/<int:sc_id>/
+
+* `Method` : GET
+
+* `Description`: It retrieves the students under the same school and department.
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    {
+        "rollno": 1,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 60.0,
+        "chemistry": 60.0,
+        "physics": 40.0,
+        "total_marks": 160.0,
+        "percentage": 53.333333333333336,
+        "created_on": "2024-10-25T08:08:28.189842Z",
+        "updated_on": "2024-11-02T05:34:17.978209Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    },
+    {
+        "rollno": 44,
+        "teacher_id": 1,
+        "name": "Rahul",
+        "maths": 85.0,
+        "chemistry": 90.0,
+        "physics": 30.0,
+        "total_marks": 205.0,
+        "percentage": 68.33333333333333,
+        "created_on": "2024-11-02T18:00:45.936041Z",
+        "updated_on": "2024-11-02T18:00:45.936041Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    }
+]
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 15. Inactivate Student.
+
+* `URL`: http://127.0.0.1:8000/student1/studentdeactivate/<int:rollno>/
+  
+* `Method` : GET
+
+* `Description`: It inactivates student data.
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+PUT /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+{
+    "message": "Student record set to inactive successfully"
+}
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 16. Active Students.
+
+* `URL`: http://127.0.0.1:8000/student1/activestudents/
+  
+* `Method` : GET
+
+* `Description`: It retrieves the active students.
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    {
+        "rollno": 1,
+        "teacher_id": 1,
+        "name": "Anu",
+        "maths": 60.0,
+        "chemistry": 60.0,
+        "physics": 40.0,
+        "total_marks": 160.0,
+        "percentage": 53.333333333333336,
+        "created_on": "2024-10-25T08:08:28.189842Z",
+        "updated_on": "2024-11-02T05:34:17.978209Z",
+        "is_active": true,
+        "sc_id": 1,
+        "dept_id": 1
+    },
+]
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
+## 17. Inactive Students.
+
+* `URL`:http://127.0.0.1:8000/student1/inactivestudents/
+
+* `Method` : GET
+
+* `Description`: It retrieves inactive students data.
+* `Content-type`:
+  
+         Content-Type: application/json
+
+
+### Example Request
+
+```http
+GET /students HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+```
+### Example Reponse
+1. HTTP Status: 200 OK
+```python
+[
+    {
+        "rollno": 6,
+        "teacher_id": 6,
+        "name": "Lakshmi Raj",
+        "maths": 91.0,
+        "chemistry": 90.0,
+        "physics": 95.0,
+        "total_marks": 276.0,
+        "percentage": 92.0,
+        "created_on": "2024-10-25T08:08:28.252434Z",
+        "updated_on": "2024-10-25T08:08:28.252434Z",
+        "is_active": false,
+        "sc_id": 3,
+        "dept_id": 4
+    },
+]
+```
+### Other Responses
+
+1. **No Students Found (204 No Content)**: 
+ 
+   If there are no students in the database, you might choose to return a 204 status, indicating that the request was successful but there is no content to return.
+   ```json
+   {
+       "status": "success",
+       "message": "No students found."
+   }
+   ```
+
+2. **Bad Request (400 Bad Request)**:  
+   If the request is malformed or contains invalid parameters, return a 400 response with an error message.
+   ```json
+   {
+       "status": "error",
+       "message": "Invalid request parameters."
+   }
+   ```
+
+3. **Internal Server Error (500 Internal Server Error)**:  
+   If an unexpected error occurs while processing the request (e.g., database errors), you can return a 500 response.
+   ```json
+   {
+       "status": "error",
+       "message": "An internal server error occurred."
+   }
+   ```
+### Messages
+
+
+### 1. No Students Found (204 No Content)
+- **Message**: "No students found."
+  - **Cause**: No students in the database or none meet the topper criteria.
+  - **Solution**: Verify student data or check selection criteria.
+
+### 2. Bad Request (400 Bad Request)
+- **Message**: "Invalid request parameters."
+  - **Cause**: Malformed request or invalid parameters.
+  - **Solution**: Check the API documentation for correct parameters.
+
+### 3. Internal Server Error (500 Internal Server Error)
+- **Message**: "An internal server error occurred. Please try again later."
+  - **Cause**: Unexpected server-side issue.
+  - **Solution**: Review server logs and contact the development team if needed.
+
