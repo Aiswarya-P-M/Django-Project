@@ -19,12 +19,12 @@ class TeachercreateView(APIView):
     # creating teacher record
     def post(self, request):
         serializer = Teacher2serializers(data=request.data)
+        print(request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'Teacher details added successfully'}, status=status.HTTP_201_CREATED)
-        else:
-            # Return the validation errors so you can debug issues
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            print(request.data)
+            serializer.save()  # This should work if sc_id is a number
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -174,18 +174,25 @@ class Inactiveteachers(APIView):
 
 # teachers under the same dept
 class Teacherbydeptview(APIView):
-    def get(self,request,dept_id):
-        teacher=Teacher2.active_objects.filter(dept_id=dept_id)
-        serializer=Teacher2serializers(teacher,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+   def get(self, request, dept_id):
+        try:
+            teachers = Teacher2.active_objects.filter(department__dept_id=dept_id)
+            serializer = Teacher2serializers(teachers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 #deactivate teacher data   
 class TeacherdeactivateView(APIView):
     def put(self, request, emp_id):
         try:
-            teacher = Teacher2.objects.filter(emp_id=emp_id).update(emp_id=None,is_active=False)
-            if teacher==0:
+            # Update only the is_active field
+            updated_count = Teacher2.objects.filter(emp_id=emp_id).update(is_active=False)
+
+            if updated_count == 0:
                 return Response({"error": "Teacher not found"}, status=status.HTTP_204_NO_CONTENT)
+
             return Response({'message': "Teacher data set to inactive successfully"}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

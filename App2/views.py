@@ -102,11 +102,17 @@ class StudentsubjectwisefailedlistView(APIView):
 
 
 #is_active with using Active Manager
-class Studentbydeptactview(APIView):
-    def get(self,request,dept_id):
-        student=Student1.active_objects.filter(dept_id=dept_id).values('name','rollno','dept_id','sc_id')
-        return Response(student,status=status.HTTP_200_OK)
 
+class Studentbydeptactview(APIView):
+    def get(self, request, dept_id):
+        # Fetch active students for the given department
+        students = Student1.active_objects.filter(dept_id=dept_id)
+        if not students.exists():
+            return Response({"error": "No active students found for this department."}, status=status.HTTP_204_NO_CONTENT)
+        
+        # Serialize the student data
+        serializer = Student1serializers(students, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 # fetching the student details  under the same school
 
@@ -133,14 +139,16 @@ class Studentunderdeptandschool(APIView):
 class StudentdeactivateView(APIView):
     def put(self, request, rollno):
         try:
-            student = Student1.objects.filter(rollno=rollno).update(rollno=None,is_active=False)
-            if student == 0:
-                return Response({'Student not found'}, status=status.HTTP_204_NO_CONTENT)
-            return Response({'Student record set to inactive successfully'}, status=status.HTTP_200_OK)
+            # Update the student record directly using the update method
+            updated_count = Student1.objects.filter(rollno=rollno).update(is_active=False)
+
+            if updated_count == 0:
+                return Response({'error': 'Student not found'}, status=status.HTTP_204_NO_CONTENT)
+
+            return Response({'message': 'Student record set to inactive successfully'}, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error":str(e)} ,status=status.HTTP_400_BAD_REQUEST)
-
-
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class ActivestudView(APIView):
     def get(self,request):

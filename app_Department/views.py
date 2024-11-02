@@ -9,15 +9,10 @@ from App2.models import Student1
 
 class DeptcreateView(APIView):
     # function for fetching all the details of department
-    def get(self, request, dept_id):
-        try:
-            # Get the department by ID
-            department = Departments.objects.get(dept_id=dept_id)
-            # Serialize the department with associated schools
-            serializer =DeptSerializer(department)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Departments.DoesNotExist:
-            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
+    def get(self,request):
+        department=Departments.objects.all()
+        serializer=DeptSerializer(department,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
     #function for creating department
     def post(self,request):
@@ -31,13 +26,15 @@ class DeptcreateView(APIView):
 
 class  DeptdetailsView(APIView):
     #function for fetching the details of particular department using the dept_id
-    def get(self,request,dept_id):
+    def get(self, request, dept_id):
         try:
-            dept=Departments.objects.get(dept_id=dept_id)
-            serializer=DeptSerializer(dept)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except:
-            return Response({"error":"Department not found"}, status=status.HTTP_204_NO_CONTENT)
+            # Get the department by ID
+            department = Departments.objects.get(dept_id=dept_id)
+            # Serialize the department with associated schools
+            serializer =DeptSerializer(department)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Departments.DoesNotExist:
+            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
 
     #function for updating the details of particular department using the dept_id
     def put(self,request,dept_id):
@@ -62,12 +59,24 @@ class DeptdeactivateView(APIView):
     # function for inactivate department
     def put(self, request, dept_id):
         try:
+            # Set department to inactive
             dept = Departments.objects.filter(dept_id=dept_id).update(is_active=False)
-            if dept==0:
+            
+            if dept == 0:
                 return Response({"error": "Department not found"}, status=status.HTTP_204_NO_CONTENT)
-            Teacher2.objects.filter(dept_id=dept_id).update(dept_id=None,is_active=False)
-            Student1.objects.filter(dept_id=dept_id).update(dept_id=None,is_active=False)
-            return Response({"Department details set to inactive successfully"}, status=status.HTTP_200_OK)
+            
+            # Update related Teacher2 records by clearing the department relationship and setting is_active to False
+            teachers = Teacher2.objects.filter(department__dept_id=dept_id)
+            teachers.update(is_active=False)
+            for teacher in teachers:
+                teacher.department.clear()  # Clear many-to-many relationship
+            
+            # Update related Student1 records by setting dept_id to None and is_active to False
+            students = Student1.objects.filter(dept_id=dept_id)
+            students.update(dept_id=None, is_active=False)
+            
+            return Response({"message": "Department details set to inactive successfully"}, status=status.HTTP_200_OK)
+        
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

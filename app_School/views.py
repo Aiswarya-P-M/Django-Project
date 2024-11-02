@@ -58,17 +58,27 @@ class SchooldeactivateView(APIView):
     #deactivating the schood by id
     def put(self, request, sc_id):
         try:
+            # Deactivate the school
             school = School.objects.filter(sc_id=sc_id).update(is_active=False)
-            if school==0:
+            if school == 0:
                 return Response({"error": "School not found"}, status=status.HTTP_204_NO_CONTENT)
-            # Inactivate related departments, teachers, and students
-            Departments.objects.filter(sc_id=sc_id).update(sc_id=None,is_active=False)
-            Teacher2.objects.filter(sc_id=sc_id).update(sc_id=None,is_active=False)
-            Student1.objects.filter(sc_id=sc_id).update(sc_id=None,is_active=False)
-            
+
+            # Deactivate related departments
+            departments = Departments.objects.filter(school_departments_list__sc_id=sc_id)
+            departments.update(is_active=False)
+
+            # Deactivate teachers associated with these departments
+            teachers = Teacher2.objects.filter(department__in=departments)
+            teachers.update(is_active=False)
+
+            # Deactivate students associated with these departments
+            students = Student1.objects.filter(dept_id__in=departments)
+            students.update(is_active=False)
+
             return Response({"message": "School and associated records set to inactive successfully"}, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ActiveSchoolView(APIView):

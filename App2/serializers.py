@@ -11,7 +11,6 @@ from app_Department.models import Departments
 #     class Meta:
 #         model=Teacher
 #         fields="__all__"
-
 class Student1serializers(serializers.ModelSerializer):
     teacher_id=serializers.PrimaryKeyRelatedField(queryset=Teacher2.objects.all())  # Allow write access
     class Meta:

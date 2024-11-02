@@ -14,10 +14,12 @@ class Teacher2serializers(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-        school = data.get('sc_id')
+        school = data.get('sc_id')  # This will be a School instance
         departments = data.get('department', [])
-        valid_departments = Departments.objects.filter(sc_id=school)
-        # Validate that each department belongs to the selected school
+
+        # Filter departments associated with the selected school
+        valid_departments = Departments.objects.filter(school_departments_list=school)
+
         for department in departments:
             if department not in valid_departments:
                 raise serializers.ValidationError(
@@ -25,4 +27,3 @@ class Teacher2serializers(serializers.ModelSerializer):
                 )
 
         return data
-
