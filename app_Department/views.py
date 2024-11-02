@@ -9,10 +9,15 @@ from App2.models import Student1
 
 class DeptcreateView(APIView):
     # function for fetching all the details of department
-    def get(self,request):
-        dept=Departments.objects.all()
-        serializer=DeptSerializer(dept,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+    def get(self, request, dept_id):
+        try:
+            # Get the department by ID
+            department = Departments.objects.get(dept_id=dept_id)
+            # Serialize the department with associated schools
+            serializer =DeptSerializer(department)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Departments.DoesNotExist:
+            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
 
     #function for creating department
     def post(self,request):
