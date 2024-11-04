@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns=[
     path('',TeachercreateView.as_view(),name='createteacher'),
-    path('byid/<int:teacher_id>/',TeacherdetailsView.as_view(),name='teacherdetails'),
+    path('byid/<int:emp_id>/',TeacherdetailsView.as_view(),name='teacherdetails'),
     path('teachperformance/',TeacherPerformanceView.as_view(),name='teachersperformance'),
     path('updateperbyadd/',UpdateperbyaddView.as_view(),name='updateper'),
     path('updateperbydel/<int:rollno>/',UpdateperbydelView.as_view(),name='performanceupdatebydel'),

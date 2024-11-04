@@ -44,7 +44,7 @@ class TeacherdetailsView(APIView):
     def put(self,request,emp_id):
         try:
             teacher=Teacher2.active_objects.get(emp_id=emp_id)
-        except Teacher2.Doesnotexist:
+        except Teacher2.DoesNotExist:
             return Response({"error":"Teacher not found"},status=status.HTTP_204_NO_CONTENT)
         serializer=Teacher2serializers(teacher,data=request.data)
         if serializer.is_valid():
@@ -105,7 +105,7 @@ class UpdateperbyaddView(APIView):
                 )
 
             return Response(
-                {"message": f"Student {student.name} details added successfully, and teacher performance updated."},
+                {"message": f"Student details added successfully, and teacher performance updated."},
                 status=status.HTTP_201_CREATED
             )
         # Return validation errors if serializer is invalid
