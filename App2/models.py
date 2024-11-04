@@ -12,11 +12,11 @@ class ActiveManager(models.Manager):
 class Student1(models.Model):
     name=models.CharField(max_length=50)
     rollno=models.AutoField(primary_key=True)
-    maths=models.FloatField()
-    chemistry=models.FloatField()
-    physics=models.FloatField()
-    total_marks=models.FloatField(editable=False)
-    percentage=models.FloatField(editable=False)
+    # maths=models.FloatField()
+    # chemistry=models.FloatField()
+    # physics=models.FloatField()
+    total_marks=models.FloatField()
+    percentage=models.FloatField()
     teacher_id = models.ForeignKey('app_Teacher.Teacher2', on_delete=models.DO_NOTHING,null=True,blank=True)
     sc_id = models.ForeignKey(School, on_delete=models.DO_NOTHING,null=True,blank=True)
     dept_id=models.ForeignKey(Departments, on_delete=models.DO_NOTHING, null=True, blank=True)
@@ -28,10 +28,10 @@ class Student1(models.Model):
     active_objects = ActiveManager()
 
     
-    def save(self, *args, **kwargs): 
-        self.total_marks = self.maths + self.chemistry + self.physics
-        self.percentage = (self.total_marks / 300) * 100
-        super(Student1, self).save(*args, **kwargs) 
+    # def save(self, *args, **kwargs): 
+    #     self.total_marks = self.maths + self.chemistry + self.physics
+    #     self.percentage = (self.total_marks / 300) * 100
+    #     super(Student1, self).save(*args, **kwargs) 
 
     
 

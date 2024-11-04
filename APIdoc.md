@@ -1,11 +1,11 @@
 # **API Documentation**
 
-This project mainly consists of 4 apps and 31 api endpoints.
+This project mainly consists of 4 apps and 47 api endpoints.
 
 1. Student app - 17 api
-2. Teacher app - 8 api
-3. School app - 6 api
-4. Department app - 6 api
+2. Teacher app - 14 api
+3. School app - 8 api
+4. Department app - 8 api
 
 
 # API Endpoints of Student app

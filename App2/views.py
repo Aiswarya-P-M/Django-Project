@@ -89,15 +89,15 @@ class Student1ListofaverageView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class StudentsubjectwisefailedlistView(APIView):
-    def get(self,request):
-        cutoff_marks=50
-        subjectwise_failures= get_subjectwise_failed(cutoff_marks)
-        return Response({
-            'failedin_maths':Student1serializers(subjectwise_failures['failedin_maths'],many=True).data,
-            'failedin_chemistry':Student1serializers(subjectwise_failures['failedin_chemistry'],many=True).data,
-            'failedin_physics':Student1serializers(subjectwise_failures['failedin_physics'],many=True).data
-        },status=status.HTTP_200_OK) 
+# class StudentsubjectwisefailedlistView(APIView):
+#     def get(self,request):
+#         cutoff_marks=50
+#         subjectwise_failures= get_subjectwise_failed(cutoff_marks)
+#         return Response({
+#             'failedin_maths':Student1serializers(subjectwise_failures['failedin_maths'],many=True).data,
+#             'failedin_chemistry':Student1serializers(subjectwise_failures['failedin_chemistry'],many=True).data,
+#             'failedin_physics':Student1serializers(subjectwise_failures['failedin_physics'],many=True).data
+#         },status=status.HTTP_200_OK) 
 
 
 
