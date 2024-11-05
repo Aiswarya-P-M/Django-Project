@@ -1,12 +1,28 @@
+from django.shortcuts import render
+from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password, make_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.shortcuts import render
 from app_User.models import Users
 from app_User.serializers import Userserializers
-from django.contrib.auth.hashers import check_password, make_password
+
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
+
+
+class LoginView(APIView):
+    def post(self,request):
+        username=request.data["username"]
+        password=request.data["password"]
+        user=authenticate(request,username=username,password=password)
+        if user is not None:
+            token,created=Token.objects.get_or_create(user=user)
+            return Response({"token":token.key},status=status.HTTP_200_OK)
+        else:
+            return Response({"error":"Invalid credentials"},status=status.HTTP_401_UNAUTHORISED)
 
 class UsercreateView(APIView):
     def post(self,request):
@@ -20,6 +36,11 @@ class UsercreateView(APIView):
         users=Users.objects.all()
         serializer=Userserializers(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+    def delete(self,request):
+        users=Users.objects.all()
+        users.delete()
+        return Response({"message":"All users deleted successfully"}, status=status.HTTP_200_OK)
     
 class ChangePasswordView(APIView):
     def put(self, request, *args, **kwargs):
@@ -47,3 +68,4 @@ class ChangePasswordView(APIView):
         user.save()
 
         return Response({"success": "Password updated successfully."}, status=status.HTTP_200_OK)
+

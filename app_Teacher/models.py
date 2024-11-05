@@ -15,7 +15,7 @@ class Teacher2(models.Model):
     updated_on=models.DateTimeField(auto_now=True)
     sc_id = models.ForeignKey('app_School.School', on_delete=models.DO_NOTHING,null=True,blank=True)
     is_active=models.BooleanField(default=True)
-    department=models.ManyToManyField('app_Department.Departments',related_name='teacher_list')
+    department=models.ManyToManyField('app_Department.Departments',related_name='teacher_list') 
 
     objects = models.Manager()  # The default manager
     active_objects = ActiveManager()

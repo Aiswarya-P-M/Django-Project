@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "Myapp",
     "rest_framework",
+    "rest_framework.authtoken",#authentication app of restframework
     "App2",
     "django_extensions",
     "app_School",
@@ -131,4 +132,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
+rest_framework={
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.TokenAuthentication'
+    ]
+}

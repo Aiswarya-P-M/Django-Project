@@ -7,7 +7,8 @@ from django.utils.crypto import get_random_string
 from app_User.models import Users
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-
+import random
+import string
 
 def datafetch():
 
@@ -68,27 +69,46 @@ def assign_dept_to_all_schools():
     
 
 def make_teacher_as_user():
-
-    teachers = Teacher2.objects.filter(is_active=True) 
+#Filter Active Teachers
+    teachers = Teacher2.objects.filter(is_active=True)
+    role=["Teacher","HOD","Principal"]
+    #Loop Through Each Active Teacher: 
     for teacher in teachers:
-     
+     #Generate Username:
         username = f"{teacher.name.lower().replace(' ', '_')}_{teacher.emp_id}"
+        random_password = ''.join(random.choices(string.ascii_letters + string.digits,k=8))
+        hashed_password = make_password(random_password)
        
-    
+    #Check If Username Already Exists:
         if Users.objects.filter(username=username).exists():
             print(f"Username '{username}' already exists for another user.")
             continue
+
+        name_parts=teacher.name.split(' ',1)
+        first_name=name_parts[0]
+        last_name=name_parts[1] if len(name_parts)>1 else ''
        
-  
+        #If the username does not already exist, a new Users instance is created
         user = Users(
+            id=teacher.emp_id,
             username=username,
-            password='', 
-            last_login=timezone.now() 
+            password=hashed_password, 
+            last_login=timezone.now() ,
+            performance=teacher.performance,
+            first_name=first_name,
+            last_name=last_name,
+            sc_id=teacher.sc_id,
+            is_active=teacher.is_active,
+            created_on=teacher.created_on,
+            updated_on=teacher.updated_on,
+            role=random.choice(role)
         )
         user.save()
  
-        print(f"Created user: {user.username} with a generated password.")
-
+        user.department.set(teacher.department.all())
+        
+        print(f"Created user: {user.username} with a generated password, performance: {user.performance}, "
+              f"school ID: {user.sc_id}, departments: {list(user.department.all())}")
 
 
 

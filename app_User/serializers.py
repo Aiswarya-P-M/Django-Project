@@ -16,3 +16,5 @@ class Userserializers(serializers.ModelSerializer):
             # Raise validation error with a specific message if password fails validation
             raise serializers.ValidationError(e.messages)
         return value
+    
+    

@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+# from rest_framework.permissions import IsAuthenticated
 from App2.models import Student1
 from app_Teacher.models import Teacher2
 from app_Teacher.serializers import *
@@ -10,6 +10,7 @@ from App2.utils import calculate_teacher_pass_percentage
 
 # Create your views here.
 class TeachercreateView(APIView):
+    # permission_classes=[IsAuthenticated]
     #fetching teacher record
     def get(self, request):
         teachers = Teacher2.objects.all()
