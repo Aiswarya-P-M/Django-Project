@@ -137,3 +137,5 @@ rest_framework={
         'rest_framework.authentication.TokenAuthentication'
     ]
 }
+
+AUTH_USER_MODEL='app_User.Users'

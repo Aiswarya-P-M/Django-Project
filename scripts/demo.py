@@ -7,46 +7,47 @@ from django.utils.crypto import get_random_string
 from app_User.models import Users
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 import random
 import string
 
-def datafetch():
+# def datafetch():
 
-    # Fetch all teacher employee IDs
-    teacher_ids = Teacher2.objects.values_list('emp_id', flat=True)
-    print("Teacher IDs:", list(teacher_ids))
+#     # Fetch all teacher employee IDs
+#     teacher_ids = Teacher2.objects.values_list('emp_id', flat=True)
+#     print("Teacher IDs:", list(teacher_ids))
 
-    # Fetch all students
-    students = Student1.objects.all()
+#     # Fetch all students
+#     students = Student1.objects.all()
 
-    # Iterate through all students
-    for student in students:
-        try:
-            # Get the teacher based on the student's teacher ID
-            if student.teacher_id in teacher_ids:  # Ensure the teacher exists
-                teacher = Teacher2.objects.get(emp_id=student.teacher_id)
-                student.teacher_id = teacher  # Assign the teacher to the student
-                student.save()  # Save the changes
+#     # Iterate through all students
+#     for student in students:
+#         try:
+#             # Get the teacher based on the student's teacher ID
+#             if student.teacher_id in teacher_ids:  # Ensure the teacher exists
+#                 teacher = Teacher2.objects.get(emp_id=student.teacher_id)
+#                 student.teacher_id = teacher  # Assign the teacher to the student
+#                 student.save()  # Save the changes
 
-                # Print confirmation for each student update
-                print(f"Updated student ID {student.name} ({student.name}) with teacher ID {teacher.emp_id} ({teacher.name})")
-            else:
-                print(f"No matching teacher ID {student.teacher_id} for student ID {student.name} ({student.name}).")
-        except Teacher2.DoesNotExist:
-            print(f"Teacher with ID {student.teacher_id} does not exist for student ID {student.name} ({student.name}).")
-        except Exception as e:
-            print(f"An error occurred while updating student ID {student.name}: {e}")
+#                 # Print confirmation for each student update
+#                 print(f"Updated student ID {student.name} ({student.name}) with teacher ID {teacher.emp_id} ({teacher.name})")
+#             else:
+#                 print(f"No matching teacher ID {student.teacher_id} for student ID {student.name} ({student.name}).")
+#         except Teacher2.DoesNotExist:
+#             print(f"Teacher with ID {student.teacher_id} does not exist for student ID {student.name} ({student.name}).")
+#         except Exception as e:
+#             print(f"An error occurred while updating student ID {student.name}: {e}")
 
-def update_teacher_performance():
-    teachers=Teacher2.objects.all()
-    for teacher in teachers:
-        try:
-            pass_percentage=calculate_teacher_pass_percentage(teacher.emp_id)
-            teacher.performance=pass_percentage
-            teacher.save()
-            print(f"Updated performance for Teacher ID {teacher.emp_id} ({teacher.name}) to {teacher.performance}%")
-        except Exception as e:
-            print(f"An error occurred while updating performance for Teacher ID {teacher.emp_id}: {e}")
+# def update_teacher_performance():
+#     teachers=Teacher2.objects.all()
+#     for teacher in teachers:
+#         try:
+#             pass_percentage=calculate_teacher_pass_percentage(teacher.emp_id)
+#             teacher.performance=pass_percentage
+#             teacher.save()
+#             print(f"Updated performance for Teacher ID {teacher.emp_id} ({teacher.name}) to {teacher.performance}%")
+#         except Exception as e:
+#             print(f"An error occurred while updating performance for Teacher ID {teacher.emp_id}: {e}")
 
 def assign_dept_to_all_schools():
     try:
@@ -67,7 +68,7 @@ def assign_dept_to_all_schools():
     except Exception as e:
         print(f"An error occurred: {e}")
     
-
+Users=get_user_model()
 def make_teacher_as_user():
 #Filter Active Teachers
     teachers = Teacher2.objects.filter(is_active=True)
@@ -77,6 +78,7 @@ def make_teacher_as_user():
      #Generate Username:
         username = f"{teacher.name.lower().replace(' ', '_')}_{teacher.emp_id}"
         random_password = ''.join(random.choices(string.ascii_letters + string.digits,k=8))
+        print("password is:",random_password)
         hashed_password = make_password(random_password)
        
     #Check If Username Already Exists:
@@ -87,7 +89,6 @@ def make_teacher_as_user():
         name_parts=teacher.name.split(' ',1)
         first_name=name_parts[0]
         last_name=name_parts[1] if len(name_parts)>1 else ''
-       
         #If the username does not already exist, a new Users instance is created
         user = Users(
             id=teacher.emp_id,
@@ -113,10 +114,10 @@ def make_teacher_as_user():
 
 
 def run():
-    print("Fetching the data")
-    datafetch()
-    print("Updating teacher performance...")
-    update_teacher_performance()
+    # print("Fetching the data")
+    # datafetch()
+    # print("Updating teacher performance...")
+    # update_teacher_performance()
     print("Assigning departments to the school...")
     assign_dept_to_all_schools()
     print("Making teachers as users...")

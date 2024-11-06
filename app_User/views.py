@@ -6,25 +6,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from app_User.models import Users
 from app_User.serializers import Userserializers
-
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 
-
-class LoginView(APIView):
-    def post(self,request):
-        username=request.data["username"]
-        password=request.data["password"]
-        user=authenticate(request,username=username,password=password)
-        if user is not None:
-            token,created=Token.objects.get_or_create(user=user)
-            return Response({"token":token.key},status=status.HTTP_200_OK)
-        else:
-            return Response({"error":"Invalid credentials"},status=status.HTTP_401_UNAUTHORISED)
-
 class UsercreateView(APIView):
+    # permission_classes=[IsAuthenticated]
     def post(self,request):
         serializer=Userserializers(data=request.data)
         if serializer.is_valid():
@@ -41,7 +29,21 @@ class UsercreateView(APIView):
         users=Users.objects.all()
         users.delete()
         return Response({"message":"All users deleted successfully"}, status=status.HTTP_200_OK)
-    
+
+class LoginView(APIView):
+    def post(self,request):
+        username=request.data["username"]
+        password=request.data["password"]
+        print(username, password)
+        user=authenticate(request,username=username,password=password)
+        # print("username is",user.username)
+        if user is not None:
+            token,created=Token.objects.get_or_create(user=user)
+            return Response({"token":token.key},status=status.HTTP_200_OK)
+            # Response({"username":user.username},status=status.HTTP_200_OK)
+        else:
+            return Response({"error":"Invalid credentials"},status=status.HTTP_401_UNAUTHORIZED)
+
 class ChangePasswordView(APIView):
     def put(self, request, *args, **kwargs):
         username = request.data.get("username")

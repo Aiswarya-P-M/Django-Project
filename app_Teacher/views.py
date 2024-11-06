@@ -32,7 +32,7 @@ class TeachercreateView(APIView):
 
 class TeacherdetailsView(APIView):
     #fetching teacher record by teacher id
-    def get(self, request, teacher_id):
+    def get(self, request, emp_id):
         try:
             teacher = Teacher2.objects.get(emp_id=teacher_id) #fetching the teacher object
             teacher_serializer = Teacher2serializers(teacher)#serializing teacher data

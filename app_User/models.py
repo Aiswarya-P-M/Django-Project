@@ -5,7 +5,7 @@ from app_Teacher.models import Teacher2
 
 # # Create your models here.
 
-
+ 
 
 
 class Users(AbstractBaseUser):
@@ -13,7 +13,7 @@ class Users(AbstractBaseUser):
     USERNAME_FIELD = 'username'
     first_name=models.CharField(max_length=50)
     last_name=models.CharField(max_length=50)
-    username = models.CharField(max_length=100)
+    username = models.CharField(max_length=100,unique=True)
     is_active = models.BooleanField(default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -26,6 +26,7 @@ class Users(AbstractBaseUser):
     REQUIRED_FIELDS = []
 
     objects = BaseUserManager()
+
 
     def save(self, *args, **kwargs):
         if self.pk is None:  # Only hash the password if the user is new
