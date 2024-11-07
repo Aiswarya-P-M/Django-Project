@@ -6,15 +6,17 @@ from django.contrib.auth.password_validation import validate_password
 class Userserializers(serializers.ModelSerializer):
     class Meta:
         model=Users
-        fields="__all__"
-
-    def validate_password(self, value):
-        try:
-            # Validate the password using Django's built-in validators
-            validate_password(value)
-        except ValidationError as e:
-            # Raise validation error with a specific message if password fails validation
-            raise serializers.ValidationError(e.messages)
-        return value
+        fields=["id","first_name","last_name","username","password","is_active","created_on","updated_on","is_admin","is_staff","is_superuser","role","performance","sc_id","department"]
+        # extra_kwargs={
+        #     'password':{'write_only':True}
+        # }
     
     
+    def create(self, validated_data):
+        department=validated_data.pop('department', [])
+        password=validated_data.pop('password')
+        user=Users(**validated_data)
+        user.set_password(password)
+        user.save()
+        user.department.set(department)
+        return user

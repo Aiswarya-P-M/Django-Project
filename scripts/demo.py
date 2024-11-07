@@ -4,10 +4,10 @@ from App2.utils import calculate_teacher_pass_percentage
 from app_School.models import School
 from app_Department.models import Departments
 from django.utils.crypto import get_random_string
-from app_User.models import Users
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from app_User.models import Users
 import random
 import string
 
@@ -49,26 +49,25 @@ import string
 #         except Exception as e:
 #             print(f"An error occurred while updating performance for Teacher ID {teacher.emp_id}: {e}")
 
-def assign_dept_to_all_schools():
-    try:
-        # Fetch all active schools
-        schools = School.active_objects.all()
+# def assign_dept_to_all_schools():
+#     try:
+#         # Fetch all active schools
+#         schools = School.active_objects.all()
         
-        # Fetch all active departments
-        departments = Departments.active_objects.all()
+#         # Fetch all active departments
+#         departments = Departments.active_objects.all()
         
-        if not departments.exists():
-            print("No active departments to assign.")
-            return
-        # Iterate through each school and add departments
-        for school in schools:
-            school.departments.add(*departments)  # Assign all departments to the current school
-            print(f"All departments have been assigned to the school: {school.sc_name}")
+#         if not departments.exists():
+#             print("No active departments to assign.")
+#             return
+#         # Iterate through each school and add departments
+#         for school in schools:
+#             school.departments.add(*departments)  # Assign all departments to the current school
+#             print(f"All departments have been assigned to the school: {school.sc_name}")
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
     
-Users=get_user_model()
 def make_teacher_as_user():
 #Filter Active Teachers
     teachers = Teacher2.objects.filter(is_active=True)
@@ -76,19 +75,18 @@ def make_teacher_as_user():
     #Loop Through Each Active Teacher: 
     for teacher in teachers:
      #Generate Username:
-        username = f"{teacher.name.lower().replace(' ', '_')}_{teacher.emp_id}"
-        random_password = ''.join(random.choices(string.ascii_letters + string.digits,k=8))
-        print("password is:",random_password)
-        hashed_password = make_password(random_password)
+        username = f"{teacher.name.lower().split()[0]}"
+        plain_password =f"{username}123"
+        print("password is:",plain_password)
+        hashed_password = make_password(plain_password)
        
     #Check If Username Already Exists:
         if Users.objects.filter(username=username).exists():
             print(f"Username '{username}' already exists for another user.")
             continue
 
-        name_parts=teacher.name.split(' ',1)
-        first_name=name_parts[0]
-        last_name=name_parts[1] if len(name_parts)>1 else ''
+        first_name=teacher.name.split()[0]
+        last_name=teacher.name.split()[1] if len(teacher.name.split()) > 1 else ""
         #If the username does not already exist, a new Users instance is created
         user = Users(
             id=teacher.emp_id,
@@ -118,9 +116,7 @@ def run():
     # datafetch()
     # print("Updating teacher performance...")
     # update_teacher_performance()
-    print("Assigning departments to the school...")
-    assign_dept_to_all_schools()
-    print("Making teachers as users...")
+    
     make_teacher_as_user()
 
 if __name__ == "__main__":
